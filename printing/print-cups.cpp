@@ -510,7 +510,7 @@ bool PrintCUPS::printSmallTicket(const PrintTicketInfo &ptInfo, QPrinter &printe
   fm = painter.fontMetrics();
   text = ptInfo.thTicket;
   textWidth = fm.size(Qt::TextExpandTabs | Qt::TextDontClip, text);
-  painter.drawText(printer.width() - textWidth.width() - Margin, yPos, text);
+  //painter.drawText(printer.width() - textWidth.width() - Margin, yPos, text);
   yPos = yPos + fm.lineSpacing();
 
 
@@ -963,7 +963,7 @@ bool PrintCUPS::printSmallTicket(const PrintTicketInfo &ptInfo, QPrinter &printe
     code.remove(QChar(','), Qt::CaseSensitive);
     code.remove(QChar('.'), Qt::CaseSensitive);
     code = "*"+code+"*"; //for code 39 to work.
-    painter.drawText((printer.width()/2)-(fm.size(Qt::TextExpandTabs | Qt::TextDontClip, code).width()/2)-Margin, Margin+yPos, code);
+    //painter.drawText((printer.width()/2)-(fm.size(Qt::TextExpandTabs | Qt::TextDontClip, code).width()/2)-Margin, Margin+yPos, code);
     //now draw the number in text (no barcode) below.
     tmpFont = QFont("Bitstream Vera Sans", textSize);
     painter.setFont(tmpFont);

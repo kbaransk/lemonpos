@@ -2544,7 +2544,8 @@ void lemonView::finishCurrentTransaction()
       myDb->insertTransactionItem(tItemInfo);
 
       //re-select the transactionItems model
-      historyTicketsModel->select();
+      // KB:performance optimization
+      // historyTicketsModel->select();
 
       iname = iname.replace("\n", "|");
 
@@ -2574,6 +2575,10 @@ void lemonView::finishCurrentTransaction()
       ticketLines.append(tLineInfo);
     } //each product on productHash
     
+    // KB:performance optimization
+    //re-select the transactionItems model
+    historyTicketsModel->select();
+
     tInfo.itemcount = cantidad; // qty of products (again, at Hash)
 
     double soDiscounts = 0;

@@ -1094,6 +1094,7 @@ int lemonView::getItemRow(QString c)
 
 void lemonView::refreshTotalLabel()
 {
+    buyPoints = 0;
     //BEGIN of REWRITE: This code has been rewritten from scratch, again. DEC 18 2011.
     totalSum = 0;
     totalTax = 0;

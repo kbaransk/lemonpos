@@ -1632,8 +1632,11 @@ if ( doNotAddMoreItems ) { //only for reservations
     if ( info.isARawProduct ) productFound = false;
     double descuento=0.0;
     if (info.validDiscount) descuento = info.disc*qty;
-    if ( !productFound )
+    bool showMessageBox = false;
+    if ( !productFound ) {
+        showMessageBox = true;
       msg = i18n("<html><font color=red><b>Product not found in database.</b></font></html>");
+    }
     else if ( productFound ) {
       //NOW CHECK IF ITS A GROUP
       QString iname = info.desc;
@@ -1696,10 +1699,17 @@ if ( doNotAddMoreItems ) { //only for reservations
     if (allowNegativeStock && info.stockqty < qty && info.code > 0) //we are inserting the product the first time, so no onlist.FIXME: check for group case.
         msg = i18n("<html><font color=red>The product you requested %1 articles <b>has a negative or zero stock level.</b></font></html>", qty);
     qDebug()<<"AllowNegativeStock:"<<allowNegativeStock<<" info.stockqty:"<<info.stockqty<<" qty:"<<qty;
-    
+
     if (!msg.isEmpty()) {
         if (ui_mainview.mainPanel->currentIndex() == pageMain) {
-          tipCode->showTip(msg, 7000);
+            if (showMessageBox) {
+                QMessageBox msgBox(QMessageBox::Warning, "info", msg, QMessageBox::Ok, this);
+                msgBox.setModal(true);
+                msgBox.setWindowModality(Qt::ApplicationModal);
+                msgBox.exec();
+            } else {
+                tipCode->showTip(msg, 7000);
+            }
         }
         if (ui_mainview.mainPanel->currentIndex() == pageSearch) {
           ui_mainview.labelSearchMsg->setText(msg);

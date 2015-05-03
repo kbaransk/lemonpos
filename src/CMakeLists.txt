@@ -33,6 +33,9 @@ set(lemon_SRCS
    refacturar.cpp
    bundlelist.cpp
    #printers/sp500.cpp
+   BasketPriceCalculationService.cpp
+   nouns/BasketPriceSummary.cpp
+   nouns/User.cpp
  )
 
 #qt4_add_dbus_adaptor(lemon_SRCS org.kde.lemon.lemon.xml lemon.h lemon)

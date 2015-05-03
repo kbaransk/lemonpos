@@ -43,6 +43,8 @@
 #include "../../mibitWidgets/mibitnotifier.h"
 #include "../../squeeze/src/clienteditor.h"
 
+#include "BasketPriceCalculationService.h"
+
 
 //StarMicronics printers
 // #include "printers/sp500.h"
@@ -366,7 +368,7 @@ lemonView::lemonView(QWidget *parent) //: QWidget(parent)
 void lemonView::qtyChanged(QTableWidgetItem *item)
 {
     //NOTE: This method is executed only when the data is changed. If the delegate does not allow the change, then this is not executed (signal not emitted).
-    //qDebug()<<"qtyChanged: "<<item->data(Qt::DisplayRole).toString()<<" COLUMN:"<<item->column();
+
     ///NOTE: Allow price change this way too?. It is more difficult than qty change, implies permissions.
     ///      The  spinbox only support integers. We need a config option to turn ON/OFF this feature.
     if (item && item->column() == colQty) { //item == ui_mainview.tableWidget ->currentItem() &&
@@ -1134,7 +1136,9 @@ void lemonView::refreshTotalLabel()
     //BEGIN no special Orders
     if ( specialOrders.isEmpty() && reservationPayment <= 0 )
         foreach(ProductInfo prod, productsHash) {
-            if (prod.isNotDiscountable) nonDiscountables++;
+            if (prod.isNotDiscountable) {
+                nonDiscountables++;
+            }
             double iPrice = prod.price; //one item
             double iTaxM = 0;
             //if item has discount, apply it.
@@ -1211,11 +1215,11 @@ void lemonView::refreshTotalLabel()
         RoundingInfo rSubTotalSum = roundUsStandard(subTotalSum);
         //then round total
         RoundingInfo rTotalSum = roundUsStandard(totalSum);
-        
+
         ///NOTE: discount must not be rounded!.. example: total= 2.95 -> 3.0 discount= 0.5 => 1.0, grand total= 3-1 = 2 and should be 2.90.
         //then round change
         RoundingInfo rChange = roundUsStandard(change);
-        
+
         //assigning them.
         totalTax    = rTotalTax.doubleResult;
         subTotalSum = rSubTotalSum.doubleResult;
@@ -1230,10 +1234,19 @@ void lemonView::refreshTotalLabel()
     }
 
     ///refresh labels.
-    ui_mainview.labelTotal->setText(QString("%1").arg(KGlobal::locale()->formatMoney(totalSum)));
-    ui_mainview.lblSubtotal->setText(QString("%1").arg(KGlobal::locale()->formatMoney(subTotalSum)));
+    BasketPriceSummary summary = recalculateBasket(oDiscountMoney);
+    if (isNum) {
+        change = paid - summary.getGross();
+    }
+    else {
+        change = 0.0;
+    }
+
+    ui_mainview.labelTotal->setText(QString("%1").arg(KGlobal::locale()->formatMoney(summary.getGross())));
+    ui_mainview.lblSubtotal->setText(QString("%1").arg(KGlobal::locale()->formatMoney(summary.getNet())));
     ui_mainview.labelChange->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(change)));
-    ui_mainview.lblSaleTaxes->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(totalTax)));
+    ui_mainview.labelTotalDiscount->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(summary.getDiscountGross())));
+    ui_mainview.lblSaleTaxes->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(summary.getTax())));
     ///update client discount
     //QString dStr;
     //if (clientInfo.discount >0) {
@@ -1839,7 +1852,7 @@ int lemonView::doInsertItem(QString itemCode, QString itemDesc, double itemQty, 
   //This resizes the heigh... looks beter...
   ui_mainview.tableWidget->resizeRowsToContents();
 
-  if (productsHash.contains(itemCode.toULongLong())) { 
+  if (productsHash.contains(itemCode.toULongLong())) {
     ProductInfo  info = productsHash.value(itemCode.toULongLong());
     if (info.units != uPiece) itemDoubleClicked(item);//NOTE: Pieces must be id=1 at database!!!! its a workaround.
     ///WARNING: March 17 2012. Im implementing a double clicking feature for adding a delegate for typing the new QTY for the clicked item.
@@ -2784,11 +2797,15 @@ void lemonView::finishCurrentTransaction()
     refreshTotalLabel();
 
     QString realSubtotal;
-    if (Settings::addTax())
+    //if (Settings::addTax()) {
       //realSubtotal = KGlobal::locale()->formatMoney(subTotalSum-discMoney+soDiscounts+pDiscounts, QString(), 2);
       realSubtotal = KGlobal::locale()->formatMoney(subTotalSum+discMoney+soDiscounts+pDiscounts, QString(), 2);
-    else
-      realSubtotal = KGlobal::locale()->formatMoney(subTotalSum-totalTax+discMoney+soDiscounts+pDiscounts, QString(), 2); //FIXME: es +discMoney o -discMoney??
+      qDebug()<<"\n realSubtotal[1]\t\tsubTotalSum:" << subTotalSum << ", discMoney: " << discMoney << ", soDiscounts: " << soDiscounts << ", pDiscounts: " << pDiscounts << endl;
+    //}
+    //else {
+    //  realSubtotal = KGlobal::locale()->formatMoney(subTotalSum-totalTax+discMoney+soDiscounts+pDiscounts, QString(), 2); //FIXME: es +discMoney o -discMoney??
+    //  qDebug()<<"\n realSubtotal[2]\t\tsubTotalSum:" << subTotalSum << ", totalTax: " << totalTax << ", discMoney: " << discMoney << ", soDiscounts: " << soDiscounts << ", pDiscounts: " << pDiscounts << endl;
+    //}
 
     qDebug()<<"\n pDiscounts:"<<pDiscounts;
     qDebug()<<"\n >>>>>>>>> Real SUBTOTAL = "<<realSubtotal<<"  subTotalSum = "<<subTotalSum<<" ADDTAXES:"<<Settings::addTax()<<"  Disc:"<<discMoney;
@@ -4648,12 +4665,10 @@ void lemonView::clientChanged()
 void lemonView::updateClientInfo()
 {
   QString dStr;
-  if (clientInfo.discount >0) {
-      double discMoney = (clientInfo.discount/100)*totalSumWODisc;
-      dStr = i18n("Discount: <b>%1%</b> [<b>%2</b>]",clientInfo.discount, KGlobal::locale()->formatMoney(discMoney));
-  } else if (oDiscountMoney >0 ){
-      dStr = i18n("Discount: <b>%1%</b>", KGlobal::locale()->formatMoney(oDiscountMoney));
-  }
+  BasketPriceCalculationService basketPriceCalculationService;
+  BasketPriceSummary summary = basketPriceCalculationService.calculateBasketPrice(this->productsHash, this->clientInfo, oDiscountMoney);
+  double discMoney = summary.getDiscountGross(); //(clientInfo.discount/100)*totalSumWODisc;
+  dStr = i18n("Discount: <b>%1%</b> [<b>%2</b>]",clientInfo.discount, KGlobal::locale()->formatMoney(discMoney));
   
   QString pStr = i18n("<i>%1</i> points", clientInfo.points);
   if (clientInfo.points <= 0)
@@ -6815,6 +6830,22 @@ void lemonView::facturasLibres()
     notifierPanel->showNotification(QString("<i>%1</i> Folios <b>disponibles</b> para facturar.").arg(num),5000);
     
     delete myDb;
+}
+
+BasketPriceSummary lemonView::recalculateBasket(double oDiscountMoney) {
+    BasketPriceCalculationService basketPriceCalculationService;
+    BasketPriceSummary summary = basketPriceCalculationService.calculateBasketPrice(this->productsHash, this->clientInfo, oDiscountMoney);
+    summary.getPoints();
+    this->subTotalSum = summary.getNet();
+    this->totalSumWODisc = summary.getGross();
+    this->totalSum = summary.getGross();
+    this->totalTax = summary.getTax();
+    this->discMoney = summary.getDiscountGross();
+//    this->buyPoints = (qulonglong)summary.getPoints();
+
+    qDebug() << "[recalculateBasket] net: " << KGlobal::locale()->formatMoney(summary.getNet()) << ", gross: " << KGlobal::locale()->formatMoney(summary.getGross()) << ", discount: " << KGlobal::locale()->formatMoney(summary.getDiscountGross()) << ", tax: " << KGlobal::locale()->formatMoney(summary.getTax()) << ", points: " << summary.getPoints();
+
+    return summary;
 }
 
 #include "lemonview.moc"

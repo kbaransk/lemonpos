@@ -78,14 +78,14 @@ QLineEdit:focus, QDoubleSpinBox:focus
     padding: 0px;
 }
 
-QLabel#lblSaleTaxes, QLabel#lblSubtotal
+QLabel#lblSaleTaxes, QLabel#lblSubtotal, QLabel#labelTotalDiscount
 {
   color: darkGray;
   font-weight: bold;
   font-size:30px;
 }
 
-QLabel#lblSaleTaxesPre, QLabel#lblSubtotalPre
+QLabel#lblSaleTaxesPre, QLabel#lblSubtotalPre, QLabel#labelTotalDiscountpre
 {
   color: darkGray;
   font-weight: bold;

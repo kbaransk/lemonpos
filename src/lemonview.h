@@ -39,6 +39,8 @@ class MibitNotifier;
 #include "ui_mainview.h"
 #include "bundlelist.h"
 
+#include "nouns/BasketPriceSummary.h"
+
 /**
  * This is the main view class for lemon.  Most of the non-menu,
  * non-toolbar, and non-statusbar (e.g., non frame) GUI code should go
@@ -147,6 +149,8 @@ public:
     void setupClientsModel();
 
     RoundingInfo roundUsStandard(const double &number);
+
+    BasketPriceSummary recalculateBasket(double oDiscountMoney);
 
   signals:
     /**

@@ -1236,17 +1236,17 @@ void lemonView::refreshTotalLabel()
     ///refresh labels.
     BasketPriceSummary summary = recalculateBasket(oDiscountMoney);
     if (isNum) {
-        change = paid - summary.getGross();
+        change = paid - summary.getGross().toDouble();
     }
     else {
         change = 0.0;
     }
 
-    ui_mainview.labelTotal->setText(QString("%1").arg(KGlobal::locale()->formatMoney(summary.getGross())));
-    ui_mainview.lblSubtotal->setText(QString("%1").arg(KGlobal::locale()->formatMoney(summary.getNet())));
+    ui_mainview.labelTotal->setText(QString("%1").arg(KGlobal::locale()->formatMoney(summary.getGross().toDouble())));
+    ui_mainview.lblSubtotal->setText(QString("%1").arg(KGlobal::locale()->formatMoney(summary.getNet().toDouble())));
     ui_mainview.labelChange->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(change)));
-    ui_mainview.labelTotalDiscount->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(summary.getDiscountGross())));
-    ui_mainview.lblSaleTaxes->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(summary.getTax())));
+    ui_mainview.labelTotalDiscount->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(summary.getDiscountGross().toDouble())));
+    ui_mainview.lblSaleTaxes->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(summary.getTax().toDouble())));
     ///update client discount
     //QString dStr;
     //if (clientInfo.discount >0) {
@@ -4667,7 +4667,7 @@ void lemonView::updateClientInfo()
   QString dStr;
   BasketPriceCalculationService basketPriceCalculationService;
   BasketPriceSummary summary = basketPriceCalculationService.calculateBasketPrice(this->productsHash, this->clientInfo, oDiscountMoney);
-  double discMoney = summary.getDiscountGross(); //(clientInfo.discount/100)*totalSumWODisc;
+  double discMoney = summary.getDiscountGross().toDouble(); //(clientInfo.discount/100)*totalSumWODisc;
   dStr = i18n("Discount: <b>%1%</b> [<b>%2</b>]",clientInfo.discount, KGlobal::locale()->formatMoney(discMoney));
   
   QString pStr = i18n("<i>%1</i> points", clientInfo.points);
@@ -6836,14 +6836,14 @@ BasketPriceSummary lemonView::recalculateBasket(double oDiscountMoney) {
     BasketPriceCalculationService basketPriceCalculationService;
     BasketPriceSummary summary = basketPriceCalculationService.calculateBasketPrice(this->productsHash, this->clientInfo, oDiscountMoney);
     summary.getPoints();
-    this->subTotalSum = summary.getNet();
-    this->totalSumWODisc = summary.getGross();
-    this->totalSum = summary.getGross();
-    this->totalTax = summary.getTax();
-    this->discMoney = summary.getDiscountGross();
+    this->subTotalSum = summary.getNet().toDouble();
+    this->totalSumWODisc = summary.getGross().toDouble();
+    this->totalSum = summary.getGross().toDouble();
+    this->totalTax = summary.getTax().toDouble();
+    this->discMoney = summary.getDiscountGross().toDouble();
 //    this->buyPoints = (qulonglong)summary.getPoints();
 
-    qDebug() << "[recalculateBasket] net: " << KGlobal::locale()->formatMoney(summary.getNet()) << ", gross: " << KGlobal::locale()->formatMoney(summary.getGross()) << ", discount: " << KGlobal::locale()->formatMoney(summary.getDiscountGross()) << ", tax: " << KGlobal::locale()->formatMoney(summary.getTax()) << ", points: " << summary.getPoints();
+    qDebug() << "[recalculateBasket] net: " << summary.getNet() << ", gross: " << summary.getGross() << ", discount: " << summary.getDiscountGross() << ", tax: " << summary.getTax() << ", points: " << summary.getPoints();
 
     return summary;
 }

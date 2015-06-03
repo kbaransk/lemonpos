@@ -3,46 +3,12 @@
 //
 
 #include "BasketPriceSummary.h"
-
-BasketEntryPriceSummary::BasketEntryPriceSummary(double net, double gross, double tax, double discountGross, int points) {
-    this->net = net;
-    this->gross = gross;
-    this->tax = tax;
-    this->discountGross = discountGross;
-    this->points = points;
-}
-
-BasketEntryPriceSummary::~BasketEntryPriceSummary() {
-}
-
-double BasketEntryPriceSummary::getNet() {
-    return this->net;
-}
-
-double BasketEntryPriceSummary::getGross() {
-    return this->gross;
-}
-
-double BasketEntryPriceSummary::getTax() {
-    return this->tax;
-}
-
-double BasketEntryPriceSummary::getDiscountGross() {
-    return this->discountGross;
-}
-
-int BasketEntryPriceSummary::getPoints() {
-    return this->points;
-}
-
-
-// ------------------------------------------
-
+#include <QDebug>
 
 BasketPriceSummary::BasketPriceSummary() {
 }
 
-BasketPriceSummary::BasketPriceSummary(double net, double gross, double tax, double discountGross, int points) {
+BasketPriceSummary::BasketPriceSummary(Currency net, Currency gross, Currency tax, Currency discountGross, qulonglong points) {
     this->net = net;
     this->gross = gross;
     this->tax = tax;
@@ -50,33 +16,49 @@ BasketPriceSummary::BasketPriceSummary(double net, double gross, double tax, dou
     this->points = points;
 }
 
+QString BasketPriceSummary::toString() {
+    QString result;
+    QTextStream out(&result);
+    out.setRealNumberPrecision(2);
+    out.setRealNumberNotation(QTextStream::FixedNotation);
+    out.setFieldWidth(10);
+    out.setFieldAlignment(QTextStream::AlignLeft);
+    out << "net" << net << "gross" << gross << "tax" << tax << "discount" << discountGross << "points" << points;
+    return result;
+}
+
+
 void BasketPriceSummary::add(BasketEntryPriceSummary basketEntryPriceSummary) {
-    net += basketEntryPriceSummary.getNet();
-    gross += basketEntryPriceSummary.getGross();
-    tax += basketEntryPriceSummary.getTax();
-    discountGross += basketEntryPriceSummary.getDiscountGross();
+    QString before = this->toString();
+
+    net.add(basketEntryPriceSummary.getNet());
+    gross.add(basketEntryPriceSummary.getGross());
+    tax.add(basketEntryPriceSummary.getTax());
+    discountGross.add(basketEntryPriceSummary.getDiscountGross());
     points += basketEntryPriceSummary.getPoints();
+
+    qDebug() << "!!! Adding:  " << basketEntryPriceSummary.toString() << "\nto:          " << before << "\nthat gives:  " << this->toString();
 }
 
 BasketPriceSummary::~BasketPriceSummary() {
 }
 
-double BasketPriceSummary::getNet() {
+Currency BasketPriceSummary::getNet() {
     return this->net;
 }
 
-double BasketPriceSummary::getGross() {
+Currency BasketPriceSummary::getGross() {
     return this->gross;
 }
 
-double BasketPriceSummary::getTax() {
+Currency BasketPriceSummary::getTax() {
     return this->tax;
 }
 
-double BasketPriceSummary::getDiscountGross() {
+Currency BasketPriceSummary::getDiscountGross() {
     return this->discountGross;
 }
 
-int BasketPriceSummary::getPoints() {
+qulonglong BasketPriceSummary::getPoints() {
     return this->points;
 }

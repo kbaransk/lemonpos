@@ -5,46 +5,29 @@
 #ifndef LEMON_BASKETPRICESUMMARY_H
 #define LEMON_BASKETPRICESUMMARY_H
 
-
-class BasketEntryPriceSummary {
-private:
-    double net;
-    double gross;
-    double tax;
-    double discountGross;
-    int points;
-
-public:
-    BasketEntryPriceSummary(double net, double gross, double tax, double discountGross, int points);
-    virtual ~BasketEntryPriceSummary();
-
-public: //getters
-    double getNet();
-    double getGross();
-    double getTax();
-    double getDiscountGross();
-    int getPoints();
-};
+#include "BasketEntryPriceSummary.h"
 
 class BasketPriceSummary {
 private:
-    double net;
-    double gross;
-    double tax;
-    double discountGross;
-    int points;
+    Currency net;
+    Currency gross;
+    Currency tax;
+    Currency discountGross;
+    qulonglong points;
 
 public:
     BasketPriceSummary();
-    BasketPriceSummary(double net, double gross, double tax, double discountGross, int points);
+    BasketPriceSummary(Currency net, Currency gross, Currency tax, Currency discountGross, qulonglong points);
     virtual ~BasketPriceSummary();
+    QString toString();
+
     void add(BasketEntryPriceSummary basketEntryPriceSummary);
 public: //getters
-    double getNet();
-    double getGross();
-    double getTax();
-    double getDiscountGross();
-    int getPoints();
+    Currency getNet();
+    Currency getGross();
+    Currency getTax();
+    Currency getDiscountGross();
+    qulonglong getPoints();
 };
 
 

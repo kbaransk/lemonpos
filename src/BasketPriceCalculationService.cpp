@@ -77,8 +77,8 @@ BasketPriceSummary BasketPriceCalculationService::calculateBasketPrice(QHash<qul
 
     if (useSalesmanDiscount) {
         // apply absolut discount
-        double factor = salesmanDiscount / basketPriceSummary.getGross();
-        BasketPriceSummary salesmanDiscountedBasketPriceSummary(basketPriceSummary.getNet() * factor, basketPriceSummary.getGross() * factor, basketPriceSummary.getTax() * factor, salesmanDiscount, basketPriceSummary.getPoints());
+        double factor = salesmanDiscount / basketPriceSummary.getGross().toDouble();
+        BasketPriceSummary salesmanDiscountedBasketPriceSummary(basketPriceSummary.getNet().toDouble() * factor, basketPriceSummary.getGross().toDouble() * factor, basketPriceSummary.getTax().toDouble() * factor, salesmanDiscount, basketPriceSummary.getPoints());
         return salesmanDiscountedBasketPriceSummary;
     }
 

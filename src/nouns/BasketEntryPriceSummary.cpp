@@ -1,6 +1,14 @@
 #include "BasketEntryPriceSummary.h"
 #include <QTextStream>
 
+BasketEntryPriceSummary::BasketEntryPriceSummary(double net, double gross, double tax, double discountGross, qulonglong points) {
+    this->net = Currency(net);
+    this->gross = Currency(gross);
+    this->tax = Currency(tax);
+    this->discountGross = Currency(discountGross);
+    this->points = points;
+}
+
 BasketEntryPriceSummary::BasketEntryPriceSummary(Currency net, Currency gross, Currency tax, Currency discountGross, qulonglong points) {
     this->net = net;
     this->gross = gross;
@@ -19,6 +27,8 @@ QString BasketEntryPriceSummary::toString() {
     out.setRealNumberNotation(QTextStream::FixedNotation);
     out.setFieldWidth(10);
     out.setFieldAlignment(QTextStream::AlignLeft);
+
+    QString points = QString::number(this->points);
     out << "net" << net << "gross" << gross << "tax" << tax << "discount" << discountGross << "points" << points;
     return result;
 }

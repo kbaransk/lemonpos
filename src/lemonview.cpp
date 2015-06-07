@@ -6843,7 +6843,8 @@ BasketPriceSummary lemonView::recalculateBasket(double oDiscountMoney) {
     this->discMoney = summary.getDiscountGross().toDouble();
 //    this->buyPoints = (qulonglong)summary.getPoints();
 
-    qDebug() << "[recalculateBasket] net: " << summary.getNet() << ", gross: " << summary.getGross() << ", discount: " << summary.getDiscountGross() << ", tax: " << summary.getTax() << ", points: " << summary.getPoints();
+    QString points = QString::number(summary.getPoints());
+    qDebug() << "[recalculateBasket] net: " << summary.getNet() << ", gross: " << summary.getGross() << ", discount: " << summary.getDiscountGross() << ", tax: " << summary.getTax() << ", points: " << points;
 
     return summary;
 }

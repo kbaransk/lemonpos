@@ -8,7 +8,7 @@ Currency::Currency()
 
 Currency::Currency(double amount)
 {
-    this->amount = amount * 100.0;
+    this->amount = amount * 100.0 + 0.5;
 }
 
 Currency::~Currency()

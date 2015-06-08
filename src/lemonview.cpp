@@ -2254,24 +2254,10 @@ void lemonView::finishCurrentTransaction()
   if (ui_mainview.checkCash->isChecked() || ui_mainview.checkOwnCredit->isChecked()) {
     double amnt = ui_mainview.editAmount->text().toDouble();
 
-
     ///NOTE:The bug that does not accept exact amount to pay, came in recent time. It was not present some time ago.
     ///     Maybe it is due to some system|library software update (change).
-    double dif1 = amnt - totalSum;
-    double dif2 = totalSum - amnt;
-
-    if (dif1 < 0) dif1 = dif1*(-1);
-    if (dif2 < 0) dif2 = dif2*(-1);
-
-    qDebug()<<"  dif1    :"<<QString::number(dif1,'f',64);
-    qDebug()<<"  dif2    :"<<QString::number(dif2,'f',64);
     qDebug()<<"  amnt    :"<<QString::number(amnt,'f',64);
     qDebug()<<"  totalSum:"<<QString::number(totalSum,'f',64);
-
-    bool iguales = false;
-    if ( (dif1 < 0.1) && (dif2 < 0.1) ) {
-        iguales = true;//the difference is practically zero.
-    }
 
     //another aproach
     QLocale localeForPrinting;
@@ -2280,9 +2266,7 @@ void lemonView::finishCurrentTransaction()
     qDebug()<<" Tendered Str:"<<amntStr<<" Total Str:"<<totalStr;
     
 
-    if (iguales)
-        canfinish = true;
-    else if ( amnt < totalSum ) {
+    if ( amnt < totalSum ) {
       canfinish = false;
       ui_mainview.editAmount->setFocus();
       ui_mainview.editAmount->setStyleSheet("background-color: rgb(255,100,0); color:white; selection-color: white; font-weight:bold;");

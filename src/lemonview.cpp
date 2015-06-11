@@ -430,6 +430,7 @@ void lemonView::qtyChanged(QTableWidgetItem *item)
                     msg = i18n("<html><font color=red><b>There are only %1 articles of your choice at stock.<br> You requested %2</b></font></html>", info.stockqty,newQty+onList);
 
                 if (ui_mainview.mainPanel->currentIndex() == pageMain) {
+                    ui_mainview.editItemCode->clearFocus();
                     tipCode->showTip(msg, 6000);
                 }
                 if (ui_mainview.mainPanel->currentIndex() == pageSearch) {
@@ -1417,7 +1418,8 @@ bool lemonView::incrementTableItemQty(QString code, double q)
 
 
     if ( ui_mainview.mainPanel->currentIndex() == pageMain && !msg.isEmpty() ) {
-         tipCode->showTip(msg, 6000);
+        ui_mainview.editItemCode->clearFocus();
+        tipCode->showTip(msg, 6000);
     }
     
     QTableWidgetItem *itemQ = ui_mainview.tableWidget->item(info.row, colQty);//item qty
@@ -1594,8 +1596,10 @@ if ( doNotAddMoreItems ) { //only for reservations
     if ( qty-intqty > 0 ) {
       //quantities are different, and its a fraction.. like 0.5 or 1.2
       msg = i18n("The requiered qty is %1 and its not allowed for the required product, please verify the quantity", qty);
-      if (intqty <= 0)  //Because below there is a return if qty<=0
+      if (intqty <= 0) { //Because below there is a return if qty<=0
+        ui_mainview.editItemCode->clearFocus();
         tipCode->showTip(msg, 6000);
+      }
     }
     qty = intqty;
   }
@@ -1645,9 +1649,7 @@ if ( doNotAddMoreItems ) { //only for reservations
     if ( info.isARawProduct ) productFound = false;
     double descuento=0.0;
     if (info.validDiscount) descuento = info.disc*qty;
-    bool showMessageBox = false;
     if ( !productFound ) {
-        showMessageBox = true;
       msg = i18n("<html><font color=red><b>Product not found in database.</b></font></html>");
     }
     else if ( productFound ) {
@@ -1715,14 +1717,8 @@ if ( doNotAddMoreItems ) { //only for reservations
 
     if (!msg.isEmpty()) {
         if (ui_mainview.mainPanel->currentIndex() == pageMain) {
-            if (showMessageBox) {
-                QMessageBox msgBox(QMessageBox::Warning, "info", msg, QMessageBox::Ok, this);
-                msgBox.setModal(true);
-                msgBox.setWindowModality(Qt::ApplicationModal);
-                msgBox.exec();
-            } else {
-                tipCode->showTip(msg, 7000);
-            }
+            ui_mainview.editItemCode->clearFocus();
+            tipCode->showTip(msg, 10000);
         }
         if (ui_mainview.mainPanel->currentIndex() == pageSearch) {
           ui_mainview.labelSearchMsg->setText(msg);
@@ -2084,6 +2080,7 @@ void lemonView::itemDoubleClicked(QTableWidgetItem* item)
     ui_mainview.editItemCode->setFocus();
   } else {
     msg = i18n("<html><font color=red><b>Product not available in stock for the requested quantity.</b></font></html>");
+    ui_mainview.editItemCode->clearFocus();
     tipCode->showTip(msg, 6000);
   }
   productsHash.insert(code, info);

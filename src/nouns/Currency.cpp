@@ -15,6 +15,17 @@ Currency::~Currency()
 {
 }
 
+void Currency::set(Currency newValue)
+{
+    this->amount = newValue.amount;
+}
+
+void Currency::set(double newValue)
+{
+    this->amount = newValue * 100.0 + 0.5;
+}
+
+
 void Currency::substract(Currency currency)
 {
     this->amount -= currency.amount;
@@ -27,12 +38,12 @@ void Currency::add(Currency currency)
 
 void Currency::multiply(double multiplier)
 {
-    this->amount *= multiplier;
+    this->amount = this->amount * multiplier + 0.5;
 }
 
 void Currency::divide(double divider)
 {
-    this->amount /= divider;
+    this->amount = this->amount / divider + 0.5;
 }
 
 double Currency::toDouble() const {

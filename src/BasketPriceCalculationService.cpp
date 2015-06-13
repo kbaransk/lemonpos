@@ -35,28 +35,37 @@ double BasketPriceCalculationService::calculateEntryDiscount(ProductInfo & prod,
 BasketEntryPriceSummary BasketPriceCalculationService::calculateBasketEntry(ProductInfo & prod, ClientInfo & client, bool applyDiscounts) {
     bool pricesAreGross = !Settings::addTax(); //just a better name to understant what to do.
 
-    double entryTotal = prod.qtyOnList * prod.price;
+    Currency entryTotal(prod.qtyOnList * prod.price);
 
-    double entryDiscount = applyDiscounts ? this->calculateEntryDiscount(prod, client, pricesAreGross) : 0.0;
-    double entryDiscountGross = applyDiscounts ? this->calculateEntryDiscount(prod, client, true) : 0.0;
+    Currency entryDiscount(applyDiscounts ? this->calculateEntryDiscount(prod, client, pricesAreGross) : 0.0);
+    Currency entryDiscountGross(applyDiscounts ? this->calculateEntryDiscount(prod, client, true) : 0.0);
 
-    double entryBasePrice = entryTotal - entryDiscount;
+    Currency entryBasePrice(entryTotal);
+    entryBasePrice.substract(entryDiscount);
 
 
     double taxFactor = (prod.tax + prod.extratax) / 100;
-    double entryTax = 0.0;
-    double entryNetPrice = 0.0;
-    double entryGrossPrice = 0.0;
+    Currency entryTax;
+    Currency entryNetPrice;
+    Currency entryGrossPrice;
 
     if (pricesAreGross) {
-        entryNetPrice = entryBasePrice / (1 + taxFactor);
-        entryGrossPrice = entryBasePrice;
-        entryTax = entryBasePrice - entryNetPrice;
+        entryNetPrice.set(entryBasePrice);
+        entryNetPrice.divide(1 + taxFactor);
+
+        entryGrossPrice.set(entryBasePrice);
+
+        entryTax.set(entryBasePrice);
+        entryTax.substract(entryNetPrice);
     }
     else {
-        entryNetPrice = entryBasePrice;
-        entryTax = entryBasePrice * taxFactor;
-        entryGrossPrice = entryNetPrice + entryTax;
+        entryNetPrice.set(entryBasePrice);
+
+        entryTax.set(entryBasePrice);
+        entryTax.multiply(taxFactor);
+
+        entryGrossPrice.set(entryNetPrice);
+        entryGrossPrice.add(entryTax);
     }
 
 

@@ -20,6 +20,9 @@ public:
     Currency(double amount);
     virtual ~Currency();
 
+    void set(Currency newValue);
+    void set(double newValue);
+
     void substract(Currency currency);
     void add(Currency currency);
     void multiply(double multiplier);

@@ -2821,6 +2821,21 @@ void lemonView::finishCurrentTransaction()
     qDebug()<<" \n soGTotal:"<<soGTotal<<" deliveryDT:"<<soDeliveryDT<<"\n";
 
 
+    BasketPriceCalculationService basketPriceCalculationService;
+    BasketPriceSummary summary = basketPriceCalculationService.calculateBasketPrice(this->productsHash, this->clientInfo, oDiscountMoney);
+    Currency subtotal(summary.getGross());
+    subtotal.add(summary.getDiscountGross());
+    subtotal.substract(summary.getTax());
+
+    ticket.subTotal = KGlobal::locale()->formatMoney(subtotal.toDouble(), QString(), 2);
+    ticket.totalTax = summary.getTax().toDouble();
+    //ticket.total = summary.getGross() ;
+    ticket.clientDiscMoney = 0.0;
+
+    qDebug() << "KB: sub and total " << ticket.subTotal << " / " << ticket.totalTax;
+    //ptInfo.totDisc = summary.getDiscountGross().toDouble();
+
+
     ///TODO: Imprimir FACTURA.
     ///      * Factura o Ticket ?? Preguntar si imprimir FACTURa, si NO solo imprimir ticket, si SI imprimir SOLO FACTURA, sin ticket. (VERIFICAR ESTO)
     ///      * Casos en los que no se puede imprimir factura:
@@ -3379,6 +3394,12 @@ void lemonView::printTicket(TicketInfo ticket)
         ptInfo.resTotalAmountStr  = i18n("Purchase Total Amount");
       else
         ptInfo.resTotalAmountStr  = i18n("Reservation Total Amount");
+
+//      BasketPriceCalculationService basketPriceCalculationService;
+//      BasketPriceSummary summary = basketPriceCalculationService.calculateBasketPrice(this->productsHash, this->clientInfo, oDiscountMoney);
+//      ptInfo.subtotal = summary.getGross().toDouble() + summary.getDiscountGross().toDouble();
+//      ptInfo.taxes = summary.getTax().toDouble();
+//      ptInfo.totDisc = summary.getDiscountGross().toDouble();
 
       QPrinter printer;
       printer.setFullPage( true );

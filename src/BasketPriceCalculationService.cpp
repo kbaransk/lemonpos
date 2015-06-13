@@ -7,19 +7,17 @@ double BasketPriceCalculationService::calculateEntryDiscount(ProductInfo & prod,
     double entryTotal = prod.qtyOnList * prod.price;
     double entryDiscount = 0.0;
 
-    if (!prod.isNotDiscountable) {
-        // Product discount. validDiscount==true -> use absolute; validDiscount==false -> use percentage
-        if (prod.validDiscount) {
-            entryDiscount += prod.qtyOnList * prod.disc;
-        }
-        else {
-            entryDiscount += (prod.discpercentage * entryTotal) / 100;
-        }
+    // Product discount. validDiscount==true -> use absolute; validDiscount==false -> use percentage
+    if (prod.validDiscount) {
+        entryDiscount += prod.qtyOnList * prod.disc;
+    }
+    else {
+        entryDiscount += (prod.discpercentage * entryTotal) / 100;
+    }
 
-        // Client discount
-        if (client.discount >= 0) {
-            entryDiscount += (client.discount * entryTotal) / 100;
-        }
+    // Client discount
+    if (!prod.isNotDiscountable && client.discount >= 0) {
+        entryDiscount += (client.discount * entryTotal) / 100;
     }
 
     if (!pricesAreGross && forceGross) {

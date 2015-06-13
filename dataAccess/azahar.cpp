@@ -337,7 +337,7 @@ ProductInfo Azahar::getProductInfo(const QString &code, const bool &notConsiderD
       
      //get discount info... if have one.
      QSqlQuery query2(db);
-     if ( !info.isNotDiscountable ) { //get discounts if !isNotDiscountable...
+     //if ( !info.isNotDiscountable ) { //get discounts if !isNotDiscountable...
         if (query2.exec(QString("Select * from offers where product_id=%1").arg(info.code) )) {
         QList<double> descuentos; descuentos.clear();
         while (query2.next()) // return the valid discount only (and the greater one if many).
@@ -368,7 +368,7 @@ ProductInfo Azahar::getProductInfo(const QString &code, const bool &notConsiderD
             info.disc =       (info.discpercentage/100) * (info.price); //round((info.discpercentage/100) * (info.price*100))/100; //FIXME:This is not necesary VALID.
             } else {info.disc = 0; info.validDiscount =false;}
         }
-     } else {info.disc = 0; info.validDiscount = false;} // if !nondiscountable
+     //} else {info.disc = 0; info.validDiscount = false;} // if !nondiscountable
      /// If its a group, calculate the right price first.  @note: this will be removed when taxmodels are coded.
      double priceDrop = 0;
      if (info.isAGroup) {

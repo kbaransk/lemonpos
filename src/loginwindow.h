@@ -80,8 +80,7 @@ class LoginWindow : public QDialog
         PasswordOnly = 1
       };
     LoginWindow::Mode currentMode;
-    LoginWindow(QWidget *parent,
-                QString caption,
+    LoginWindow(QString caption,
                 QString prompt,
                 LoginWindow::Mode mode=LoginWindow::FullScreen);
     ~LoginWindow();

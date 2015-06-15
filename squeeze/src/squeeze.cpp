@@ -467,31 +467,6 @@ void squeeze::setupActions()
 
 }
 
-
-void squeeze::saveProperties(KConfigGroup &config)
-{
-    // the 'config' object points to the session managed
-    // config file.  anything you write here will be available
-    // later when this app is restored
-
-//     if (!m_view->currentURL().isNull()) {
-//         config.writePathEntry("lastURL", m_view->currentURL());
-//     }
-}
-
-void squeeze::readProperties(const KConfigGroup &config)
-{
-    // the 'config' object points to the session managed
-    // config file.  this function is automatically called whenever
-    // the app is being restored.  read in here whatever you wrote
-    // in 'saveProperties'
-
-//     QString url = config.readPathEntry("lastURL", QString());
-//
-//     if (!url.isEmpty())
-//         m_view->openURL(KUrl::fromPathOrUrl(url));
-}
-
 /**This is used to get Database user,password,server to set initial config, in case the db server is remote.
 So we show the config dialog, and when saved login again. It is called from main_view.login()
 **/

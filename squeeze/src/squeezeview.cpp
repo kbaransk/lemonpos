@@ -97,8 +97,7 @@ squeezeView::squeezeView(QWidget *parent)
   db = QSqlDatabase::addDatabase("QMYSQL");
 
   ///Login dialog
-  dlgPassword = new LoginWindow(this,
-                                 i18n("Authorisation Required"),
+  dlgPassword = new LoginWindow(i18n("Authorisation Required"),
                                  i18n("Enter administrator/supervisor user and password please."),
                                  LoginWindow::PasswordOnly);
 
@@ -814,7 +813,7 @@ void squeezeView::updateGraphs()
 
       //NOW ALMOST SOLD OUT PRODUCTS (top 5)
       maxPoint = myDb->getAlmostSoldOutMaximum(Settings::mostSoldMaxValue());
-      plist    = myDb->getAlmostSoldOutProducts(Settings::mostSoldMinValue(),Settings::mostSoldMaxValue());
+      plist    = myDb->getAlmostSoldOutProducts(Settings::mostSoldMaxValue());
 
       if (!plist.isEmpty()) {
         if (!graphSoldItemsCreated) setupGraphs();

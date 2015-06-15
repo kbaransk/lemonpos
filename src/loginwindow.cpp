@@ -35,8 +35,7 @@
 #include <QSqlDatabase>
 #include <QTimer>
 
-LoginWindow::LoginWindow(QWidget *parent,
-                         QString caption,
+LoginWindow::LoginWindow(QString caption,
                          QString prompt,
                          LoginWindow::Mode mode)
 {
@@ -128,7 +127,6 @@ LoginWindow::LoginWindow(QWidget *parent,
   labelPrompt->setObjectName("labelPrompt");
   labelError->setObjectName("labelError");
 
-  QRect geom = geometry();
   //qDebug()<<"Geometry:"<<geom;
   QString str("admin");
   QString path; QPixmap pixm;
@@ -199,7 +197,7 @@ void LoginWindow::paintEvent(QPaintEvent* event){
   //getting style source.
   fileName = path + Settings::styleName() + "/" + Settings::styleName() + ".qss";
   QFile file(fileName);
-  bool op = file.open(QFile::ReadOnly);
+  file.open(QFile::ReadOnly);
   QString styleSheet = QLatin1String(file.readAll());
   //replace fakepath to the real path..
   QString bgName;

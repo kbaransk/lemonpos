@@ -559,9 +559,6 @@ bool PrintCUPS::printSmallTicket(const PrintTicketInfo &ptInfo, QPrinter &printe
   // Products Subheader OFFSETS
   int columnDesc = Margin*2 + (fm.size(Qt::TextExpandTabs | Qt::TextDontClip, textQty).width());
   int columnTotal= printer.width() - 5*Margin - (fm.size(Qt::TextExpandTabs | Qt::TextDontClip, textTotal).width());
-  // discount is only printed if there is any discounts on products (not global/ocassional discount)
-  int columnDisc = columnTotal - Margin - (fm.size(Qt::TextExpandTabs | Qt::TextDontClip, textDisc).width());
-  if  (ptInfo.totDisc <= 0) columnDisc = columnTotal - Margin;
 
   //Printing Qty
   painter.drawText(Margin, Margin+yPos, textQty);

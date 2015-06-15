@@ -370,14 +370,12 @@ ProductInfo Azahar::getProductInfo(const QString &code, const bool &notConsiderD
         }
      //} else {info.disc = 0; info.validDiscount = false;} // if !nondiscountable
      /// If its a group, calculate the right price first.  @note: this will be removed when taxmodels are coded.
-     double priceDrop = 0;
      if (info.isAGroup) {
       //get each content price and tax percentage.
       GroupInfo gInfo = getGroupPriceAndTax(info);
       info.price = gInfo.price; //it includes price drop!
       info.tax   = gInfo.tax;
       info.extratax = 0; //accumulated in tax...
-      priceDrop = gInfo.priceDrop;
       //qDebug()<<"=================== GROUP Price:"<<info.price<<" Tax:"<<info.tax<<"======================";
      }
      ///tax calculation - it depends on discounts... @note: this will be removed when taxmodels are coded.
@@ -890,7 +888,7 @@ double result = 0;
   return result;
 }
 
-QList<pieProdInfo> Azahar::getAlmostSoldOutProducts(int min, int max)
+QList<pieProdInfo> Azahar::getAlmostSoldOutProducts(int max)
 {
   QList<pieProdInfo> products; products.clear();
   pieProdInfo info;
@@ -1225,7 +1223,7 @@ BundleInfo Azahar::getMaxBundledForProduct(qulonglong pId)
     return result;
 }
 
-double Azahar::getBundlePriceFor(qulonglong pId, double qty)
+double Azahar::getBundlePriceFor(qulonglong pId)
 {
     double result = 0;
     if (!db.isOpen()) db.open();
@@ -4965,34 +4963,6 @@ bool Azahar::setReservationPayment(const qulonglong &id, const double &amount)
     query.bindValue(":amount", amount);
     
     if (!query.exec()) setError(query.lastError().text()); else result=true;
-    return result;
-}
-
-//credits
-CreditInfo Azahar::getCreditInfo(const qulonglong &id)
-{
-    CreditInfo result;  //NOTE: This method is not used.
-//     result.id=0;
-//     result.clientId = 0;
-//     result.total = 0;
-//     if (!db.isOpen()) db.open();
-//     if (db.isOpen()) {
-//         QSqlQuery myQuery(db);
-//         myQuery.prepare("SELECT * FROM credits WHERE id=:id;");
-//         myQuery.bindValue(":id", id);
-//         if (myQuery.exec() ) {
-//             while (myQuery.next()) {
-//                 int fieldClient  = myQuery.record().indexOf("customerid");
-//                 int fieldTotal   = myQuery.record().indexOf("total");
-//                 result.id = id;
-//                 result.clientId = myQuery.value(fieldClient).toULongLong();
-//                 result.total    = myQuery.value(fieldTotal).toDouble();
-//             }
-//         }
-//         else {
-//             setError(myQuery.lastError().text());
-//         }
-//     }
     return result;
 }
 

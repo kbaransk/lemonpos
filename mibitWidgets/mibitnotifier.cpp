@@ -113,7 +113,6 @@ void MibitNotifier::animate(const int &step)
     int midPointX = (windowGeom.width()/2);
     int newX; int newW;
     QRect dRect;
-    int pheight = m_parent->geometry().height();
     if (maxWidth < min_W ) newW = min_W; else newW = maxWidth;
     if ((midPointX-(newW/2)) < 0) newX = 0; else newX = midPointX - (newW/2);
 

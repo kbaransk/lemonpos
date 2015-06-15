@@ -54,7 +54,7 @@ class lemonView : public QWidget, public Ui::mainview
 {
     Q_OBJECT
 public:
-    lemonView(QWidget *parent);
+    lemonView();
 
     virtual ~lemonView();
 

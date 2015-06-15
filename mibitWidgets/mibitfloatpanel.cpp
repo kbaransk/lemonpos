@@ -106,7 +106,7 @@ void MibitFloatPanel::showPanel()
         setGeometry(-1000,-1000,0,0);
         show();
         //update steps for animation, now that the panel is showing.
-        int maxStep; int minStep = 0;
+        int maxStep = 0, minStep = 0;
 
         switch (m_position) {
             case Top :

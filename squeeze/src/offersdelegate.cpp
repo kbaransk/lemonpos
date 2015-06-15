@@ -59,8 +59,7 @@ QWidget *OffersDelegate::createEditor(QWidget *parent, const QStyleOptionViewIte
 {
   if (index.column() == 4 ) return QSqlRelationalDelegate::createEditor(parent, option, index);
   else {
-    QDate date;
-    QWidget *editor;
+    QWidget *editor = NULL;
     QDoubleSpinBox *dSpinbox = new QDoubleSpinBox(parent);
     QDateEdit      *dateEdit = new QDateEdit(parent);
     switch(index.column())

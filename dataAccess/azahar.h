@@ -73,7 +73,7 @@ class Azahar : public QObject
     double       getProductDiscount(qulonglong code, bool isGroup=false); //returns the discount percentage!
     QList<pieProdInfo>  getTop5SoldProducts();
     double       getTopFiveMaximum();
-    QList<pieProdInfo>  getAlmostSoldOutProducts(int min, int max);
+    QList<pieProdInfo>  getAlmostSoldOutProducts(int max);
     double       getAlmostSoldOutMaximum(int max);
     QList<ProductInfo>  getSoldOutProducts();
     QList<ProductInfo>  getLowStockProducts(double min);
@@ -97,7 +97,7 @@ class Azahar : public QObject
     //bundles -- Same product (Simple bundle => 2x 1, 3x0.8 ..)
     QList<BundleInfo>  getBundleInfo(qulonglong productId);
     BundleInfo         getMaxBundledForProduct(qulonglong pId);
-    double             getBundlePriceFor(qulonglong pId, double qty);
+    double             getBundlePriceFor(qulonglong pId);
     
     //DEPARTMENTS
     QHash<QString, int> getDepartmentsHash();
@@ -295,7 +295,6 @@ class Azahar : public QObject
     bool     deleteCurrency(const qulonglong &cid);
 
     //Credits and its history
-    CreditInfo        getCreditInfo(const qulonglong &id);
     CreditInfo        getCreditInfoForClient(const qulonglong &clientId, const bool &create=true); //by default it creates a new credit record if no one found for the customer.
     QList<CreditHistoryInfo> getCreditHistoryForClient(const qulonglong &clientId, const int &lastDays=0);
     

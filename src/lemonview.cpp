@@ -95,7 +95,7 @@ class BalanceDialog : public QDialog
     QPushButton *buttonClose;
 
   public:
-    BalanceDialog(QWidget *parent=0, QString str="")
+    BalanceDialog(QString str)
     {
       setWindowFlags(Qt::Dialog|Qt::FramelessWindowHint);
       setWindowModality(Qt::ApplicationModal);
@@ -147,7 +147,7 @@ void lemonView::cancelByExit()
   }
 }
 
-lemonView::lemonView(QWidget *parent) //: QWidget(parent)
+lemonView::lemonView() //: QWidget(parent)
 {
   qDebug()<<"===STARTING LEMON AT "<<QDateTime::currentDateTime().toString()<<" ===";
   drawerCreated=false;
@@ -162,12 +162,10 @@ lemonView::lemonView(QWidget *parent) //: QWidget(parent)
   QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
   db = QSqlDatabase::addDatabase("QMYSQL"); //moved here because calling multiple times cause a crash on certain installations (Not kubuntu 8.10).
   ui_mainview.setupUi(this);
-  dlgLogin = new LoginWindow(this,
-                             i18n("Welcome to Lemon"),
+  dlgLogin = new LoginWindow(i18n("Welcome to Lemon"),
                              i18n("Enter username and password to start using the system."),
                              LoginWindow::FullScreen);
-  dlgPassword = new LoginWindow(this,
-                             i18n("Authorisation Required"),
+  dlgPassword = new LoginWindow(i18n("Authorisation Required"),
                              i18n("Enter administrator password please."),
                              LoginWindow::PasswordOnly);
 
@@ -796,11 +794,9 @@ void lemonView::askForTicketToReturnProduct()
   
   if (continuar) { //show input dialog to get ticket number
     bool ok=false;
-    qulonglong id = 0;
     InputDialog *dlg = new InputDialog(this, true, dialogTicket, i18n("Enter the ticket number"));
     if (dlg->exec())
     {
-      id = dlg->iValue;
       ok = true;
     }
     delete dlg;
@@ -1578,7 +1574,6 @@ if ( doNotAddMoreItems ) { //only for reservations
 
 
   bool allowNegativeStock = Settings::allowNegativeStock();
-  bool productInHash = false;
   QString msg;
 
   info = myDb->getProductInfo(codeX); //includes discount and validdiscount
@@ -1587,7 +1582,6 @@ if ( doNotAddMoreItems ) { //only for reservations
   //the next 'if' checks if the hash contains the product and got values from there.. To include purchaseQty, that we need!
   if (productsHash.contains( info.code )) {
       info = productsHash.value( info.code );
-      productInHash = true;
   }
 
   //verify item units and qty..
@@ -1629,7 +1623,7 @@ if ( doNotAddMoreItems ) { //only for reservations
       BundleInfo maxBundled = myDb->getMaxBundledForProduct(info.code); //gets the maximum qty and price for this product bundle.
       bundle.product_id = info.code;
       bundle.qty = qty + tQty;
-      bundle.price = myDb->getBundlePriceFor(info.code, tQty+qty); //FIXME: we need a price for each qty on each bundle inserted.. this is going to be at the BundleList class!
+      bundle.price = myDb->getBundlePriceFor(info.code); //FIXME: we need a price for each qty on each bundle inserted.. this is going to be at the BundleList class!
 
       qDebug()<<"Going to insert "<<bundle.qty<<" items."<<" info.qtyOnList:"<<info.qtyOnList;
       bundlesHash->addItem(bundle, maxBundled.qty);
@@ -4294,7 +4288,7 @@ void lemonView::showBalance(QStringList lines)
 {
   if (Settings::showDialogOnPrinting())
   {
-    BalanceDialog *popup = new BalanceDialog(this, lines.join("\n"));
+    BalanceDialog *popup = new BalanceDialog(lines.join("\n"));
     popup->show();
     popup->hide();
     int result = popup->exec();

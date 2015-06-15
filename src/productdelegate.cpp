@@ -185,11 +185,10 @@ void ProductDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
 }
 
 
-QSize ProductDelegate::sizeHint(const QStyleOptionViewItem &option,
-                             const QModelIndex &index) const
+QSize ProductDelegate::sizeHint(const QStyleOptionViewItem &optionUnused,
+                             const QModelIndex &indexUnused) const
 {
   return QSize(170,170);
-//   return QItemDelegate::sizeHint(option, index);
 }
 
 #include "productdelegate.moc"

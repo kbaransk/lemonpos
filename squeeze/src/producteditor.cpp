@@ -711,7 +711,6 @@ void ProductEditor::addItem()
     qulonglong code    = index.data().toULongLong();
     QString    codeStr = index.data().toString();
 
-    bool exists = false;
     ProductInfo pInfo;
     //get product info from hash or db
     if (groupInfo.productsList.contains(code)) {
@@ -720,14 +719,12 @@ void ProductEditor::addItem()
           pInfo.qtyOnList += int(addQty); //increment it  (PIECES)
       else
           pInfo.qtyOnList += addQty;      //increment it  (OTHER MEASURES)
-      exists = true;
     } else {
       pInfo = myDb->getProductInfo(codeStr, true); //the 2nd parameter is to get the taxes for the group (not considering discounts)
       if ( pInfo.units == 1 )
           pInfo.qtyOnList = int(addQty); //increment it  (PIECES)
       else
           pInfo.qtyOnList = addQty;      //increment it  (OTHER MEASURES)
-      exists = true;
     }
     //check if the product to be added is not the same of the pack product
     if (pInfo.code == ui->editCode->text().toULongLong()) continue;

@@ -43,7 +43,7 @@ class TicketPopup : public QDialog
     void paintEvent(QPaintEvent *e);
 
   public:
-    TicketPopup(QWidget *parent=0, QString text="", QPixmap pixmap=0, int timeToClose=1000);
+    TicketPopup(QString text="", QPixmap pixmap=0, int timeToClose=1000);
     void setPixmap(QPixmap pixmap) { imagelabel->setPixmap(pixmap); }
     void popup();
     virtual void paint(QPainter *) {}

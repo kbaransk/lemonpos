@@ -25,7 +25,7 @@
 
 #include <kstandarddirs.h>
 
-TicketPopup::TicketPopup(QWidget *parent, QString text, QPixmap pixmap, int timeToClose)
+TicketPopup::TicketPopup(QString text, QPixmap pixmap, int timeToClose)
 {
   setWindowFlags(Qt::Dialog|Qt::FramelessWindowHint);
   setWindowModality(Qt::ApplicationModal);

@@ -108,7 +108,7 @@ void MibitPasswordDialog::showDialog(const QString &msg, AnimationTypeP animatio
     show();
     //update steps for animation, now that the window is showing.
 
-    int maxStep; int minStep = 0;
+    int maxStep = 0, minStep = 0;
     switch (animType) {
         case atpSlideDown:
             maxStep = (m_parent->geometry().height()/2)-(maxHeight/2);

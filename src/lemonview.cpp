@@ -3535,7 +3535,7 @@ void lemonView::printTicket(TicketInfo ticket)
 
   if (Settings::showDialogOnPrinting())
   {
-    TicketPopup *popup = new TicketPopup(this, ticketHtml.join(" "), DesktopIcon("lemon-printer", 48), Settings::ticketTime()*1000);
+    TicketPopup *popup = new TicketPopup(ticketHtml.join(" "), DesktopIcon("lemon-printer", 48), Settings::ticketTime()*1000);
     connect (popup, SIGNAL(onTicketPopupClose()), this, SLOT(unfreezeWidgets()) );
     QApplication::beep();
     popup->popup();

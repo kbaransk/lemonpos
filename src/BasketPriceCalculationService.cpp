@@ -3,7 +3,6 @@
 
 double BasketPriceCalculationService::calculateEntryDiscount(ProductInfo & prod, ClientInfo & client, bool forceGross) {
     bool pricesAreGross = !Settings::addTax(); //just a better name to understant what to do.
-
     double entryTotal = prod.qtyOnList * prod.price;
     double entryDiscount = 0.0;
 
@@ -15,9 +14,15 @@ double BasketPriceCalculationService::calculateEntryDiscount(ProductInfo & prod,
         entryDiscount += (prod.discpercentage * entryTotal) / 100;
     }
 
-    // Client discount
-    if (!prod.isNotDiscountable && client.discount >= 0) {
-        entryDiscount += (client.discount * entryTotal) / 100;
+
+    if (!Settings::firstDiscountOnly() || entryDiscount <= 0) {
+        // Client discount
+        if (!prod.isNotDiscountable && client.discount >= 0) {
+            entryDiscount += (client.discount * entryTotal) / 100;
+        }
+    }
+    else {
+        qDebug() << "firstDiscountOnly was set and product is already discounted\n";
     }
 
     if (!pricesAreGross && forceGross) {

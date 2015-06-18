@@ -3408,7 +3408,8 @@ void lemonView::printTicket(TicketInfo ticket)
       
       QPrintDialog printDialog( &printer );
       printDialog.setWindowTitle(i18n("Print Receipt -- Press ESC to export to PDF to your home/lemon-printing/ folder"));
-
+ptInfo.totDisc = discMoney;
+ptInfo.tDisc = KGlobal::locale()->formatMoney(-discMoney, QString(), 2);
       if ( printDialog.exec() ) {
         //this overrides what the user chooses if he does change sizes and margins.
         printer.setPageMargins(0,0,0,0,QPrinter::Millimeter);

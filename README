@@ -1,3 +1,11 @@
+LEMON_BUILD_DIR=~/lemonpos/build
+
+rm -fr $LEMON_BUILD_DIR
+mkdir $LEMON_BUILD_DIR
+cd $LEMON_BUILD_DIR
+cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=debug -G"CodeBlocks - Unix Makefiles" ..
+
+
 
 LemonPOS is an open source Point of Sale software targeted for micro, small and medium businesses.
 MySQL is employed for data management and storage, and can be used a single database with

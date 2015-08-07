@@ -2244,6 +2244,8 @@ void squeezeView::clientsViewOnSelected(const QModelIndex & index)
 
     //Launch Edit dialog
     ClientEditor *clientEditorDlg = new ClientEditor(this);
+    clientEditorDlg->setDatabase(db);
+
     //Set data on dialog
     clientEditorDlg->setCode(code);
     clientEditorDlg->setId(id);
@@ -2818,6 +2820,8 @@ void squeezeView::createClient()
 
   if (db.isOpen()) {
     ClientEditor *clientEditorDlg = new ClientEditor(this);
+    clientEditorDlg->setDatabase(db);
+
     ClientInfo info;
     QPixmap photo;
 

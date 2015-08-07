@@ -6191,6 +6191,7 @@ void lemonView::createClient()
     
     if (db.isOpen()) {
         ClientEditor *clientEditorDlg = new ClientEditor(this);
+        clientEditorDlg->setDatabase(db);
         clientEditorDlg->setTitle("Add Customer");
         ClientInfo info;
         QPixmap photo;

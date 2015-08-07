@@ -23,6 +23,7 @@
 #include <KFileDialog>
 
 #include <QByteArray>
+#include <QPalette>
 
 #include "clienteditor.h"
 #include "../../mibitWidgets/mibitlineedit.h"
@@ -71,12 +72,22 @@ ClientEditor::ClientEditor( QWidget *parent )
     ui->sinceDatePicker->setDate(QDate::currentDate());
     
     QTimer::singleShot(750, this, SLOT(checkName()));
+
+    this->myDb = new Azahar();
+
     ui->editClientCode->setFocus();
 }
 
 ClientEditor::~ClientEditor()
 {
     delete ui;
+    delete myDb;
+}
+
+void ClientEditor::setDatabase(const QSqlDatabase& database)
+{
+    this->myDb->setDatabase(database);
+
 }
 
 void ClientEditor::changePhoto()
@@ -105,6 +116,26 @@ void ClientEditor::checkName()
       else
         enableButtonOk(true);
   }
+
+  validateCode();
+}
+
+void ClientEditor::validateCode()
+{
+    QString code = ui->editClientCode->text();
+
+    // check if client code was actually changed in comparison to original one
+    if (code.compare(this->initialClientCode) != 0)
+    {
+        // check unique client id
+        ClientInfo clientInfo = myDb->getClientInfo(code);
+
+        if (clientInfo.id != 0)
+        {
+            ui->editClientCode->setError("Client code duplicated");
+            enableButtonOk(false);
+        }
+    }
 }
 
 #include "clienteditor.moc"

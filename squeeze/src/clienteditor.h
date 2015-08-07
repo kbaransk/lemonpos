@@ -25,6 +25,8 @@
 #include <QtGui>
 #include "ui_editclient_widget.h"
 
+#include "../../dataAccess/azahar.h"
+
 class ClientEditorUI : public QFrame, public Ui::clientEditor
 {
   Q_OBJECT
@@ -39,7 +41,7 @@ class ClientEditor : public KDialog
     ClientEditor( QWidget *parent=0 );
     ~ClientEditor();
     void setTitle(QString t) {setCaption( t );}
-    void setCode(QString code) { ui->editClientCode->setText(code); };
+    void setCode(QString code) { this->initialClientCode = code; ui->editClientCode->setText(code); };
     void setName(QString name) { ui->editClientName->setText(name); };
     void setAddress(QString address) { ui->editClientAddress->setText(address); } ;
     void setPhone(QString phone) { ui->editClientPhone->setText(phone); };
@@ -59,18 +61,22 @@ class ClientEditor : public KDialog
     double  getDiscount() {return ui->editClientDiscount->text().toDouble(); }
     QPixmap getPhoto(){ return pix;};
     QDate   getSinceDate() { return ui->sinceDatePicker->date(); }
+    void setDatabase(const QSqlDatabase& database);
 
 
   private slots:
     void changePhoto();
     void checkName();
     void checkNameDelayed();
+    void validateCode();
 
 
   private:
     ClientEditorUI *ui;
     long int clientId;
     QPixmap pix;
+    Azahar* myDb;
+    QString initialClientCode = NULL;
 };
 
 #endif

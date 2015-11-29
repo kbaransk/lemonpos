@@ -3,6 +3,7 @@
 
 CREATE DATABASE lemondb;
 USE lemondb;
+ALTER DATABASE lemondb CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 CREATE TABLE IF NOT EXISTS `transactions` (
   `id` bigint(20) unsigned NOT NULL auto_increment,
@@ -34,6 +35,10 @@ CREATE TABLE IF NOT EXISTS `transactions` (
   KEY  `SEC` (`clientid`, `type`, `date`, `time`, `state`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
+ALTER TABLE `transactions` ADD FOREIGN KEY fk_transactions_clientid (`clientid`) REFERENCES `clients`(`id`);
+ALTER TABLE `transactions` ADD FOREIGN KEY fk_transactions_balanceid (`balanceId`) REFERENCES `balances`(`id`);
+ALTER TABLE `transactions` ADD FOREIGN KEY fk_transactions_providerid (`providerid`) REFERENCES `providers`(`id`);
+ALTER TABLE `transactions` ADD FOREIGN KEY fk_transactions_cardtype (`cardtype`) REFERENCES `cardtypes`(`typeid`);
 
 CREATE TABLE IF NOT EXISTS `products` (
   `code` bigint(20) unsigned NOT NULL default '0',
@@ -69,6 +74,12 @@ CREATE TABLE IF NOT EXISTS `products` (
   KEY `SEC` (`department`, `category`, `subcategory`, `name`, `alphacode`, `vendorcode`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
+ALTER TABLE `products` ADD FOREIGN KEY fk_products_units (`units`) REFERENCES `measures`(`id`);
+ALTER TABLE `products` ADD FOREIGN KEY fk_products_department (`department`) REFERENCES `departments`(`id`);
+ALTER TABLE `products` ADD FOREIGN KEY fk_products_category (`category`) REFERENCES `categories`(`catid`);
+ALTER TABLE `products` ADD FOREIGN KEY fk_products_subcategory (`subcategory`) REFERENCES `subcategories`(`id`);
+ALTER TABLE `products` ADD FOREIGN KEY fk_products_taxmodel (`taxmodel`) REFERENCES `taxmodels`(`modelid`);
+
 
 CREATE TABLE IF NOT EXISTS `bundle_same` (
   `id` bigint(20) unsigned NOT NULL auto_increment,
@@ -79,6 +90,8 @@ CREATE TABLE IF NOT EXISTS `bundle_same` (
   KEY `SEC` (`product_id`, `qty`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
+ALTER TABLE `bundle_same` ADD FOREIGN KEY fk_bundle_same_product_id (`product_id`) REFERENCES `products`(`code`);
+
 #One credit per customer. Accepts +/- amounts for credit/debit.
 CREATE TABLE IF NOT EXISTS `credits` (
   `id` bigint(20) unsigned NOT NULL auto_increment,
@@ -87,6 +100,9 @@ CREATE TABLE IF NOT EXISTS `credits` (
   PRIMARY KEY  (`id`),
   KEY `SEC` (`customerid`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+ALTER TABLE `credits` ADD FOREIGN KEY fk_credits_customerid (`customerid`) REFERENCES `clients`(`id`);
+ALTER TABLE `credits` ADD CONSTRAINT `uc_credits_customerid` UNIQUE (`customerid`);
 
 #One credit_history to have a record of each credit applied.
 # + for credit given to customer
@@ -101,6 +117,8 @@ CREATE TABLE IF NOT EXISTS `credit_history` (
   PRIMARY KEY  (`id`),
   KEY `SEC` (`customerid`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+ALTER TABLE `credit_history` ADD FOREIGN KEY fk_credit_history_customerid (`customerid`) REFERENCES `clients`(`id`);
 
 
 # special orders are special products, each order is a product containing one or more rawProducts
@@ -129,6 +147,11 @@ CREATE TABLE IF NOT EXISTS `special_orders` (
   KEY `SEC` (`saleid`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
+ALTER TABLE `special_orders` ADD FOREIGN KEY fk_special_orders_status (`status`) REFERENCES `so_status`(`id`);
+ALTER TABLE `special_orders` ADD FOREIGN KEY fk_special_orders_clientId (`clientId`) REFERENCES `clients`(`id`);
+ALTER TABLE `special_orders` ADD FOREIGN KEY fk_special_orders_userId (`userId`) REFERENCES `users`(`id`);
+ALTER TABLE `special_orders` ADD FOREIGN KEY fk_special_orders_units (`units`) REFERENCES `measures`(`id`);
+
 CREATE TABLE IF NOT EXISTS `offers` (
   `id` bigint(20) unsigned NOT NULL auto_increment,
   `discount` double NOT NULL,
@@ -137,6 +160,9 @@ CREATE TABLE IF NOT EXISTS `offers` (
   `product_id` bigint(20) unsigned NOT NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+ALTER TABLE `offers` ADD FOREIGN KEY fk_offers_product_id (`product_id`) REFERENCES `products`(`code`);
+
 
 CREATE TABLE IF NOT EXISTS `measures` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -181,6 +207,7 @@ CREATE TABLE IF NOT EXISTS `balances` (
   KEY `SEC` (`datetime_start`,`datetime_end`, `userid` )
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
+-- TODO: Add FK constraints
 
 CREATE TABLE IF NOT EXISTS `departments` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -248,6 +275,8 @@ CREATE TABLE IF NOT EXISTS `clients` (
   `photo` blob default NULL,
   PRIMARY KEY  USING BTREE (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+ALTER TABLE `clients` ADD CONSTRAINT `uc_clients_code` UNIQUE (`code`);
 
 CREATE TABLE IF NOT EXISTS `cardtypes` (
 `typeid` int(10) unsigned NOT NULL auto_increment,

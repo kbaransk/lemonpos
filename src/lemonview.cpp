@@ -3002,6 +3002,9 @@ void lemonView::finishCurrentTransaction()
    if (!ui_mainview.groupSaleDate->isHidden()) ui_mainview.groupSaleDate->hide(); //finally we hide the sale date group
    completingOrder = false; //cleaning flag
    oDiscountMoney = 0; //reset discount money... the new discount type.
+
+   // issue #8 Reset payment mode to CASH on transaction start
+   ui_mainview.checkCash->setChecked(true);
 }
 
 

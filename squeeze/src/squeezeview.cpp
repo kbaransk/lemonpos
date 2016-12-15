@@ -1440,6 +1440,7 @@ void squeezeView::setupClientsModel()
 {
   if (db.isOpen()) {
     clientsModel->setTable("clients");
+    clientsModel->setSort(1, Qt::AscendingOrder);
     ui_mainview.clientsView->setViewMode(QListView::IconMode);
     ui_mainview.clientsView->setGridSize(QSize(170,170));
     ui_mainview.clientsView->setEditTriggers(QAbstractItemView::NoEditTriggers);

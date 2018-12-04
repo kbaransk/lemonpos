@@ -80,6 +80,7 @@ public:
 
     QWidget *frameLeft, *frame;
   private:
+    qulonglong calculatePointsToPay();
     Ui::mainview ui_mainview;
     QString loggedUser;
     QString loggedUserName;

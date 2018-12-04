@@ -251,6 +251,27 @@ p, li { white-space: pre-wrap; }
      </property>
     </widget>
    </item>
+
+   <item>
+    <layout class="QHBoxLayout">
+     <item>
+      <widget class="QLabel" name="label_1">
+       <property name="text">
+        <string>How much 1 point is worth when spending:</string>
+       </property>
+       <property name="buddy">
+        <cstring>kcfg_pointSpendRatio</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="kcfg_pointSpendRatio">
+      </widget>
+     </item>
+    </layout>
+   </item>
+
+
    <item>
     <widget class="QGroupBox" name="groupBox_3">
      <property name="sizePolicy">

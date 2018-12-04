@@ -16,3 +16,4 @@ downloads
 downloads.save
 squeeze/src/piechart.*
 CMakeLists.txt.user
+/.project

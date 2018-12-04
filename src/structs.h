@@ -133,6 +133,8 @@ struct TransactionInfo
   qulonglong providerid;
   qulonglong balanceId; //to store balance where it was sold. For SESSIONS.
   double     totalTax; //in money.
+  qulonglong paidWithPointsPoints;
+  double     paidWithPointsValue;
 };
 
 struct BalanceInfo
@@ -248,6 +250,9 @@ struct TicketInfo {
   double reservationPayment;
   double purchaseTotal;
   qulonglong reservationId;
+
+  qulonglong paidWithPointsPoints;
+  double     paidWithPointsValue;
 };
 
 struct PrintTicketInfo {

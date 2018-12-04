@@ -255,6 +255,8 @@ lemonView::lemonView() //: QWidget(parent)
   connect(ui_mainview.checkOwnCredit, SIGNAL(toggled(bool)), SLOT(checksChanged())  );
   connect(ui_mainview.editAmount,SIGNAL(returnPressed()), SLOT(finishCurrentTransaction()) );
   connect(ui_mainview.editAmount, SIGNAL(textChanged(const QString &)), SLOT(refreshTotalLabel()));
+  connect(ui_mainview.editPoints,SIGNAL(returnPressed()), SLOT(finishCurrentTransaction()) );
+  connect(ui_mainview.editPoints, SIGNAL(textChanged(const QString &)), SLOT(refreshTotalLabel()));
   connect(ui_mainview.editCardNumber, SIGNAL(returnPressed()), SLOT(goSelectCardAuthNumber()) );
   connect(ui_mainview.editCardAuthNumber, SIGNAL(returnPressed()), SLOT(finishCurrentTransaction()) );
   connect(ui_mainview.splitter, SIGNAL(splitterMoved(int, int)), SLOT(setUpTable()));
@@ -505,6 +507,10 @@ void lemonView::setUpInputs()
   QRegExp regexpA("[0-9]*[//.]{0,1}[0-9]{0,5}"); //QRegExp regexpA("[0-9]*[//.]{0,1}[0-9][0-9]*"); //Cualquier numero flotante (0.1, 100, 0, .10, 100.0, 12.23)
   QRegExpValidator * validatorFloat = new QRegExpValidator(regexpA,this);
   ui_mainview.editAmount->setValidator(validatorFloat);
+  // Points input validator
+  QRegExp regexpInt("[0-9]*"); //QRegExp regexpA("[0-9]*[//.]{0,1}[0-9][0-9]*"); //Cualquier numero flotante (0.1, 100, 0, .10, 100.0, 12.23)
+  QRegExpValidator * validatorInt = new QRegExpValidator(regexpInt,this);
+  ui_mainview.editPoints->setValidator(validatorInt);
   //Item code (to insert) //
   //QRegExp regexpC("[0-9]+[0-9]*[//.]{0,1}[0-9]{0,2}[//*]{0,1}[0-9]*[A-Za-z_0-9\\\\/\\-]{0,30}"); // Instead of {0,13} fro EAN13, open for up to 30 chars.
   QRegExp regexpC("[0-9]*[//.]{0,1}[0-9]{0,5}[//*]{0,1}[0-9]*[A-Za-z_0-9\\\\/\\-]{0,30}"); // Instead of {0,13} fro EAN13, open for up to 30 chars.
@@ -723,8 +729,9 @@ void lemonView::checksChanged()
 
 void lemonView::clearUsedWidgets()
 {
-  ui_mainview.editAmount->setText("");
   ui_mainview.editCardNumber->setText("");
+  ui_mainview.editAmount->setText("");
+  ui_mainview.editPoints->setText("");
   ui_mainview.editCardAuthNumber->setText("-");
   ui_mainview.tableWidget->clearContents();
   ui_mainview.tableWidget->setRowCount(0);
@@ -1243,6 +1250,23 @@ void lemonView::refreshTotalLabel()
     ui_mainview.lblSubtotal->setText(QString("%1").arg(KGlobal::locale()->formatMoney(summary.getNet().toDouble())));
     ui_mainview.labelChange->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(change)));
     ui_mainview.labelTotalDiscount->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(summary.getDiscountGross().toDouble())));
+
+    // Points payment
+    qulonglong pointsToSpend = calculatePointsToPay();
+
+    Currency pointsDiscount = Currency(Settings::pointSpendRatio() * pointsToSpend);
+    Currency totalNoPoints = Currency(summary.getGross().toDouble());
+    totalNoPoints.substract(pointsDiscount);
+
+    if (pointsDiscount.toDouble() > 0.0) {
+      change += pointsDiscount.toDouble();
+      ui_mainview.labelChange->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(change)));
+    }
+
+    ui_mainview.labelPointsDiscount->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(pointsDiscount.toDouble())));
+    ui_mainview.labelTotalNoPoints->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(totalNoPoints.toDouble())));
+    // Points payment - END
+
     ui_mainview.lblSaleTaxes->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(summary.getTax().toDouble())));
     ///update client discount
     //QString dStr;
@@ -2324,6 +2348,17 @@ void lemonView::finishCurrentTransaction()
       ui_mainview.editClient->setFocus();
   }
 
+
+  // Points payment
+  qulonglong pointsToSpendAsInt = calculatePointsToPay();
+  if (pointsToSpendAsInt > 0.0 && (clientInfo.id <= 1 || clientInfo.points < pointsToSpendAsInt )) {
+        qDebug() << "clientInfo.points: " << clientInfo.points << " pointsToSpendAsInt: " << pointsToSpendAsInt << "\n";
+        QString msgC = i18n("<html><font color=red><b>Customer doesn't have enought points.</b> Please decrease points to pay</font></html>");
+        canfinish = false;
+        notifierPanel->showNotification(msgC,3000);
+        ui_mainview.editPoints->setFocus();
+  }
+
   if (!canfinish)
       return; ///WARNING:at the end of the if (canfinish){} block, there is oDiscount..= 0; is this right or not? can we safely quit here? At the beginnig of this method the oDiscount is calculated when calling refreshTotalLabel() method.
 
@@ -2738,7 +2773,31 @@ void lemonView::finishCurrentTransaction()
     //update transactions
     myDb->updateTransaction(tInfo);
     //increment client points
+
+    // Points payment
+    qDebug()<<"\nBEFORE DECREMENTING POINTS BY "<< pointsToSpendAsInt << "\n";
+    qDebug()<<"\nPOINTS FOR THIS TRANSACTION "<< tInfo.points << "\n";
+
+    if (pointsToSpendAsInt > 0) {
+      myDb->decrementClientPoints(tInfo.clientid, pointsToSpendAsInt);
+      qDebug()<<"\nAFTER DECREMENTING POINTS BY "<< pointsToSpendAsInt << " FOR " << tInfo.clientid << "\n";
+    }
     myDb->incrementClientPoints(tInfo.clientid, tInfo.points);
+
+    // TODO: KB Points payment info should be stored in DB as well as on printed ticket
+    //          TransactionInfo tInfo - data stored in DB
+    tInfo.paidWithPointsPoints = pointsToSpendAsInt;
+    tInfo.paidWithPointsValue  = pointsToSpendAsInt * Settings::pointSpendRatio();
+    //          TicketInfo ticket     - printed data
+    ticket.paidWithPointsPoints = pointsToSpendAsInt;
+    ticket.paidWithPointsValue  = pointsToSpendAsInt * Settings::pointSpendRatio();
+
+    // TODO: KB The following section below should reflect substracted points as well:
+    //  //update client info in the hash....
+    //  clientInfo.points += buyPoints;
+
+    // Points payment - END
+
 
     if (drawerCreated) {
         //FIXME: What to di first?... add or substract?... when there is No money or there is less money than the needed for the change.. what to do?
@@ -2765,6 +2824,7 @@ void lemonView::finishCurrentTransaction()
     }
 
     //update client info in the hash....
+    clientInfo.points -= pointsToSpendAsInt;
     clientInfo.points += buyPoints;
     clientsHash.remove(QString::number(clientInfo.id));
     clientsHash.insert(QString::number(clientInfo.id), clientInfo);
@@ -6850,6 +6910,18 @@ BasketPriceSummary lemonView::recalculateBasket(double oDiscountMoney) {
     return summary;
 }
 
+qulonglong lemonView::calculatePointsToPay() {
+  bool isNumPoints;
+  double pointsToSpend = ui_mainview.editPoints->text().toDouble(&isNumPoints);
+  if (!isNumPoints) {
+    pointsToSpend = 0.0;
+  }
+
+  // calculate points back from discount to avoid rounding issues
+  Currency pointsDiscount = Currency(Settings::pointSpendRatio() * pointsToSpend);
+  pointsDiscount.divide(Settings::pointSpendRatio());
+  pointsToSpend = pointsDiscount.toDouble();
+  return (qulonglong)(pointsToSpend + 0.5);
+}
+
 #include "lemonview.moc"
-
-

@@ -82,28 +82,28 @@ QLabel#lblSaleTaxes, QLabel#lblSubtotal, QLabel#labelTotalDiscount
 {
   color: darkGray;
   font-weight: bold;
-  font-size:30px;
+  font-size:26px;
 }
 
 QLabel#lblSaleTaxesPre, QLabel#lblSubtotalPre, QLabel#labelTotalDiscountpre
 {
   color: darkGray;
   font-weight: bold;
-  font-size: 30px;
+  font-size: 26px;
 }
 
-QLabel#labelTotal, QLabel#labelChange
+QLabel#labelTotal, QLabel#labelChange, QLabel#labelTotalNoPoints, QLabel#labelPointsDiscount
 {
  color: #0b69fd;
  font-weight: bold;
- font-size:40px;
+ font-size:35px;
 }
 
-QLabel#labelTotalpre , QLabel#labelChangepre
+QLabel#labelTotalpre , QLabel#labelChangepre, QLabel#labelTotalNoPointspre, QLabel#labelPointsDiscountpre
 {
  color: black;
  font-weight: bold;
- font-size: 40px;
+ font-size: 35px;
 }
 
 QGroupBox#groupInput

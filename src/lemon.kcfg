@@ -111,6 +111,10 @@
         <label>Allow negative stock.</label>
         <default>1</default>
     </entry>
+    <entry name="pointSpendRatio" type="Double">
+        <label>How much 1 point is worth when spending.</label>
+        <default>0.001</default>
+    </entry>
   </group>
   <group name="Database">
     <entry name="editDBServer" type="String">
@@ -209,7 +213,7 @@
     </entry>
     <entry name="printerCodec" type="String">
       <label>Get Printer Codec to use</label>
-      <default>UTF-8</default> 
+      <default>UTF-8</default>
     </entry>
   </group>
   

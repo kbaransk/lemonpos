@@ -89,6 +89,7 @@ public:
     qulonglong currentTransaction;
     qulonglong currentBalanceId;
     double  totalSum;
+    double  totalNoPoints;
     double  totalTax; // in money.
     Gaveta *drawer;
     bool   drawerCreated;

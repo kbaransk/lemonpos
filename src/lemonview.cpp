@@ -1207,8 +1207,15 @@ void lemonView::refreshTotalLabel()
     double paid, change;
     bool isNum;
     paid = ui_mainview.editAmount->text().toDouble(&isNum);
-    if (isNum) change = paid - totalSum; else change = 0.0;
-    if (paid <= 0) change = 0.0;
+    if (isNum) {
+        change = paid - totalSum;
+    }
+    else {
+        change = 0.0;
+    }
+    if (paid <= 0) {
+        change = 0.0;
+    }
     qDebug()<<"[*] Sum (w/discounts):"<<sum<<" subTotal:"<<subTotalSum<<" totalTax:"<<totalTax<<" TOTAL SUM:"<<totalSum<<" Tendered:"<<paid<<" CHANGE:"<<change;
 
     roundToUSStandard = false; //FIXME: disabled now, sometimes it is not good (+/-)
@@ -1258,13 +1265,22 @@ void lemonView::refreshTotalLabel()
     Currency totalNoPoints = Currency(summary.getGross().toDouble());
     totalNoPoints.substract(pointsDiscount);
 
+    qDebug() << "XXXXXX| " << paid << " " << isNum << (isNum && paid > 0.0001) << "\n";
     if (pointsDiscount.toDouble() > 0.0) {
-      change += pointsDiscount.toDouble();
-      ui_mainview.labelChange->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(change)));
+        if (isNum && paid > 0.0001) {
+            change += pointsDiscount.toDouble();
+            qDebug() << "XXXXXX| path1. Adding: " << pointsDiscount.toDouble() << ". Got: " << change << "\n";
+        } else {
+            change = 0.0;
+            qDebug() << "XXXXXX| path2.\n";
+        }
+        ui_mainview.labelChange->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(change)));
     }
 
+    this->totalNoPoints = totalNoPoints.toDouble();
+
     ui_mainview.labelPointsDiscount->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(pointsDiscount.toDouble())));
-    ui_mainview.labelTotalNoPoints->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(totalNoPoints.toDouble())));
+    ui_mainview.labelTotalNoPoints->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(this->totalNoPoints)));
     // Points payment - END
 
     ui_mainview.lblSaleTaxes->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(summary.getTax().toDouble())));
@@ -2280,11 +2296,20 @@ void lemonView::finishCurrentTransaction()
     QString totalStr = localeForPrinting.toString(totalSum, 'f', 2); //total
     qDebug()<<" Tendered Str:"<<amntStr<<" Total Str:"<<totalStr;
     
-
-    if ( amnt < totalSum ) {
+    if ( this->totalNoPoints < 0.0 ) {
+        canfinish = false;
+        ui_mainview.editPoints->setFocus();
+        ui_mainview.editPoints->setStyleSheet("background-color: rgb(255,100,0); color:white; selection-color: white; font-weight:bold;");
+        ui_mainview.editAmount->setStyleSheet("");
+        ui_mainview.editCardNumber->setStyleSheet("");
+        ui_mainview.editPoints->setSelection(0, ui_mainview.editPoints->text().length());
+        msg = i18n("<html><font color=red><b>Please fill the correct points amount before finishing a transaction.</b></font></html>");
+        tipAmount->showTip(msg, 4000);
+    } else if ( amnt < totalNoPoints ) {
       canfinish = false;
       ui_mainview.editAmount->setFocus();
       ui_mainview.editAmount->setStyleSheet("background-color: rgb(255,100,0); color:white; selection-color: white; font-weight:bold;");
+      ui_mainview.editPoints->setStyleSheet("");
       ui_mainview.editCardNumber->setStyleSheet("");
       ui_mainview.editAmount->setSelection(0, ui_mainview.editAmount->text().length());
       msg = i18n("<html><font color=red><b>Please fill the correct payment amount before finishing a transaction.</b></font></html>");

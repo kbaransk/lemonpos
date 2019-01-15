@@ -1112,7 +1112,6 @@ void lemonView::refreshTotalLabel()
     double totalTaxP = 0.0; //total tax percentage, calculated after tax sum is calculated, totalTaxP = taxes/sum
     int nonDiscountables = 0;
     double gDiscountPercentage = 0;
-    bool roundToUSStandard = Settings::roundToUSStandard();
     bool extractTaxes = !Settings::addTax(); //just a better name to understant what to do.
     bool notApply = false;
 
@@ -1204,59 +1203,39 @@ void lemonView::refreshTotalLabel()
         totalSum   = subTotalSum + totalTax;
     else totalSum = subTotalSum;
     //we get change
-    double paid, change;
+    double paid;
+    Currency change;
     bool isNum;
     paid = ui_mainview.editAmount->text().toDouble(&isNum);
+    Currency paidCur(paid);
     if (isNum) {
-        change = paid - totalSum;
+        Currency totalSumCur(totalSum);
+        change.set(paidCur);
+        change.substract(totalSumCur);
     }
     else {
-        change = 0.0;
+        change.set(0.0);
     }
     if (paid <= 0) {
-        change = 0.0;
+        change.set(0.0);
     }
     qDebug()<<"[*] Sum (w/discounts):"<<sum<<" subTotal:"<<subTotalSum<<" totalTax:"<<totalTax<<" TOTAL SUM:"<<totalSum<<" Tendered:"<<paid<<" CHANGE:"<<change;
-
-    roundToUSStandard = false; //FIXME: disabled now, sometimes it is not good (+/-)
-    if ( roundToUSStandard ) {
-        //first round taxes
-        RoundingInfo rTotalTax = roundUsStandard(totalTax);
-        //then round subtotal
-        RoundingInfo rSubTotalSum = roundUsStandard(subTotalSum);
-        //then round total
-        RoundingInfo rTotalSum = roundUsStandard(totalSum);
-
-        ///NOTE: discount must not be rounded!.. example: total= 2.95 -> 3.0 discount= 0.5 => 1.0, grand total= 3-1 = 2 and should be 2.90.
-        //then round change
-        RoundingInfo rChange = roundUsStandard(change);
-
-        //assigning them.
-        totalTax    = rTotalTax.doubleResult;
-        subTotalSum = rSubTotalSum.doubleResult;
-        totalSum    = rTotalSum.doubleResult;
-        change      = rChange.doubleResult;
-        //NOTE: When rounding the change it could be tricky if we play beyond reality.
-        //      Example: paid: 109.91 (which it never should hapen because $.01 coins does not exists, right?)
-        //      purchase: 109.75 rounding gets 109.80
-        //      so, the change before rounding is 0.15 (109.91 - 109.80) , rounding is 0.20.
-        //      But if instead of paying 109.91, a more real payment is 109.90;
-        //      the change before rounding is 0.14, rounding is 0.10 which is correct.
-    }
 
     ///refresh labels.
     BasketPriceSummary summary = recalculateBasket(oDiscountMoney);
     if (isNum) {
-        change = paid - summary.getGross().toDouble();
+        change.set(paidCur);
+        change.substract(summary.getGross());
     }
     else {
-        change = 0.0;
+        change.set(0.0);
     }
 
     ui_mainview.labelTotal->setText(QString("%1").arg(KGlobal::locale()->formatMoney(summary.getGross().toDouble())));
     ui_mainview.lblSubtotal->setText(QString("%1").arg(KGlobal::locale()->formatMoney(summary.getNet().toDouble())));
-    ui_mainview.labelChange->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(change)));
+    ui_mainview.labelChange->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(change.toDouble())));
     ui_mainview.labelTotalDiscount->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(summary.getDiscountGross().toDouble())));
+    this->change = change;
 
     // Points payment
     qulonglong pointsToSpend = calculatePointsToPay();
@@ -1268,17 +1247,19 @@ void lemonView::refreshTotalLabel()
     qDebug() << "XXXXXX| " << paid << " " << isNum << (isNum && paid > 0.0001) << "\n";
     if (pointsDiscount.toDouble() > 0.0) {
         if (isNum && paid > 0.0001) {
-            change += pointsDiscount.toDouble();
+            change.add(pointsDiscount);
             qDebug() << "XXXXXX| path1. Adding: " << pointsDiscount.toDouble() << ". Got: " << change << "\n";
         } else {
-            change = 0.0;
+            change.set(0.0);
             qDebug() << "XXXXXX| path2.\n";
         }
-        ui_mainview.labelChange->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(change)));
+        this->change = change;
+        ui_mainview.labelChange->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(change.toDouble())));
     }
 
     this->totalNoPoints = totalNoPoints.toDouble();
 
+    this->pointsDiscount = pointsDiscount.toDouble();
     ui_mainview.labelPointsDiscount->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(pointsDiscount.toDouble())));
     ui_mainview.labelTotalNoPoints->setText(QString("%1") .arg(KGlobal::locale()->formatMoney(this->totalNoPoints)));
     // Points payment - END
@@ -2396,7 +2377,7 @@ void lemonView::finishCurrentTransaction()
     PaymentType      pType;
     double           payWith = 0.0;
     double           payTotal = 0.0;
-    double           changeGiven = 0.0;
+    Currency         changeGiven;
     QString          authnumber = "";
     QString          cardNum = "";
     QString          paidStr = "'[Not Available]'";
@@ -2405,8 +2386,10 @@ void lemonView::finishCurrentTransaction()
     payTotal = totalSum;
     if (ui_mainview.checkCash->isChecked()) {
       pType = pCash;
-      if (!ui_mainview.editAmount->text().isEmpty()) payWith = ui_mainview.editAmount->text().toDouble();
-      changeGiven = payWith- totalSum;
+      if (!ui_mainview.editAmount->text().isEmpty()) {
+            payWith = ui_mainview.editAmount->text().toDouble();
+      }
+      changeGiven.set(this->change);
     } else if (ui_mainview.checkCard->isChecked()) {
       pType = pCard;
       Azahar *myDb = new Azahar;
@@ -2424,8 +2407,15 @@ void lemonView::finishCurrentTransaction()
     } else { //own credit
       pType = pOwnCredit;
       payWith = payTotal;
-      changeGiven = 0;
+      changeGiven.set(0);
       ///TODO: Any other ownCredit stuff?
+    }
+
+    if (pointsDiscount.toDouble() > 0.0) {
+        tInfo.paidWithPointsPoints = calculatePointsToPay();
+        tInfo.paidWithPointsValue = pointsDiscount;
+    } else {
+        qDebug()<<"\n\n\n\npaidWithPonts NOT CONVERTED\n\n\n\n";
     }
 
     tInfo.id = currentTransaction;
@@ -2453,7 +2443,7 @@ void lemonView::finishCurrentTransaction()
     }
     
     tInfo.paywith= payWith;
-    tInfo.changegiven =changeGiven;
+    tInfo.changegiven =changeGiven.toDouble();
     tInfo.paymethod = pType;
     tInfo.state = tCompleted;
     tInfo.userid = loggedUserId;
@@ -2795,6 +2785,9 @@ void lemonView::finishCurrentTransaction()
     //special orders Str on transactionInfo
     tInfo.specialOrders = ordersStr.join(","); //all special orders on the hash formated as id/qty,id/qty...
 
+    tInfo.paidWithPointsPoints = pointsToSpendAsInt;
+    tInfo.paidWithPointsValue  = pointsToSpendAsInt * Settings::pointSpendRatio();
+
     //update transactions
     myDb->updateTransaction(tInfo);
     //increment client points
@@ -2809,10 +2802,6 @@ void lemonView::finishCurrentTransaction()
     }
     myDb->incrementClientPoints(tInfo.clientid, tInfo.points);
 
-    // TODO: KB Points payment info should be stored in DB as well as on printed ticket
-    //          TransactionInfo tInfo - data stored in DB
-    tInfo.paidWithPointsPoints = pointsToSpendAsInt;
-    tInfo.paidWithPointsValue  = pointsToSpendAsInt * Settings::pointSpendRatio();
     //          TicketInfo ticket     - printed data
     ticket.paidWithPointsPoints = pointsToSpendAsInt;
     ticket.paidWithPointsValue  = pointsToSpendAsInt * Settings::pointSpendRatio();
@@ -2828,7 +2817,7 @@ void lemonView::finishCurrentTransaction()
         //FIXME: What to di first?... add or substract?... when there is No money or there is less money than the needed for the change.. what to do?
         if (ui_mainview.checkCash->isChecked()) {
           drawer->addCash(payWith);
-          drawer->substractCash(changeGiven);
+          drawer->substractCash(changeGiven.toDouble());
           drawer->incCashTransactions();
           //open drawer only if there is a printer available.
           if (Settings::openDrawer() && Settings::smallTicketDotMatrix() && Settings::printTicket())
@@ -2875,7 +2864,7 @@ void lemonView::finishCurrentTransaction()
     ticket.number = currentTransaction;
     ticket.subTotal = realSubtotal; //This is the subtotal-taxes-discount
     ticket.total  = payTotal;
-    ticket.change = changeGiven;
+    ticket.change = changeGiven.toDouble();
     ticket.paidwith = payWith;
     ticket.itemcount = cantidad;
     ticket.cardnum = cardNum;
@@ -3424,9 +3413,12 @@ void lemonView::printTicket(TicketInfo ticket)
       CreditInfo crInfo  = myDb->getCreditInfoForClient(ticket.clientid, false); //gets the credit info for the client, wihtout creating a new creditInfo if not exists.
       if (crInfo.id > 0) {
           //the client has credit info.
-          ptInfo.thPoints   = i18n(" %3 [ %4 ]| You got %1 points | Your accumulated is :%2 | | Your credit balance is: %5", ticket.buyPoints, ticket.clientPoints, clientName, ticket.clientid, KGlobal::locale()->formatMoney(crInfo.total, QString(), 2));
+          ptInfo.thPoints   = i18n(" %3 [ %4 ]| You got %1 points | Your accumulated is: %2 | | Your credit balance is: %5", ticket.buyPoints, ticket.clientPoints, clientName, ticket.clientid, KGlobal::locale()->formatMoney(crInfo.total, QString(), 2));
       } else {
-          ptInfo.thPoints   = i18n(" %3 [ %4 ]| You got %1 points | Your accumulated is :%2 | ", ticket.buyPoints, ticket.clientPoints, clientName, ticket.clientid);
+          ptInfo.thPoints   = i18n(" %3 [ %4 ]| You got %1 points | Your accumulated is: %2 | ", ticket.buyPoints, ticket.clientPoints, clientName, ticket.clientid);
+      }
+      if (ticket.paidWithPointsPoints > 0) {
+        ptInfo.thPoints.append(i18n("Points used: %1 | ", ticket.paidWithPointsPoints));
       }
 
       ptInfo.ticketInfo = ticket;
@@ -3470,6 +3462,9 @@ void lemonView::printTicket(TicketInfo ticket)
       ptInfo.thTax = hTax;
       ptInfo.thSubtotal = hSubtotal;
       ptInfo.thTendered = hTendered;
+      ptInfo.paidWithPointsValue = ticket.paidWithPointsValue;
+      ptInfo.labelPaidWithPointsValue = i18n("Paid w/ points");
+      ptInfo.paidWithPointsValueString = KGlobal::locale()->formatMoney(ticket.paidWithPointsValue.toDouble(), QString(), 2);;
       //for reservations
       ptInfo.hdrReservation = i18n(" RESERVATION ");
       if (!ptInfo.ticketInfo.reservationStarted)

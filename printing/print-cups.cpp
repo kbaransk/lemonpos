@@ -872,6 +872,16 @@ bool PrintCUPS::printSmallTicket(const PrintTicketInfo &ptInfo, QPrinter &printe
     tmpFont.setWeight(QFont::Normal);
     painter.setFont(tmpFont);
     fm = painter.fontMetrics();
+
+    if (ptInfo.paidWithPointsValue.toDouble() > 0.0) {
+        //PAID WITH POINTS
+        textWidth = fm.size(Qt::TextExpandTabs | Qt::TextDontClip, ptInfo.labelPaidWithPointsValue);
+        painter.drawText(printer.width()-(printer.width()/3)-textWidth.width(), Margin+yPos, ptInfo.labelPaidWithPointsValue);
+        QString paidWithPointsValueString =  ptInfo.paidWithPointsValueString;
+        textWidth = fm.size(Qt::TextExpandTabs | Qt::TextDontClip, paidWithPointsValueString);
+        painter.drawText((printer.width() - textWidth.width() - Margin), Margin+yPos, paidWithPointsValueString);
+        yPos = yPos + fm.lineSpacing();
+    }
     //TENDERED
     textWidth = fm.size(Qt::TextExpandTabs | Qt::TextDontClip, ptInfo.thTendered);
     painter.drawText(printer.width()-(printer.width()/3)-textWidth.width(), Margin+yPos, ptInfo.thTendered);
@@ -1938,7 +1948,7 @@ bool PrintCUPS::printSmallSOTicket(const PrintTicketInfo &ptInfo, QPrinter &prin
             //we repeat for each trozo
             if (x*(tamTrozo-1) < strCopy.length())
               strCopy.insert(x*(tamTrozo-1), "|  "); //create a section
-              otherList = strCopy.split("|");
+            otherList = strCopy.split("|");
           }
           if (!otherList.isEmpty()) strList << otherList;
           if (trozos < 1) strList << strTmp;

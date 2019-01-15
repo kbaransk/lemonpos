@@ -81,6 +81,8 @@ public:
     QWidget *frameLeft, *frame;
   private:
     qulonglong calculatePointsToPay();
+    Currency change;
+    Currency pointsDiscount;
     Ui::mainview ui_mainview;
     QString loggedUser;
     QString loggedUserName;

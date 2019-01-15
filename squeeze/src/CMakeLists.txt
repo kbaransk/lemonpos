@@ -25,6 +25,7 @@ set(squeeze_SRCS
    ../../mibitWidgets/mibitnotifier.cpp
    ../../printing/print-dev.cpp
    ../../printing/print-cups.cpp
+   ../../src/nouns/Currency.cpp
  )
 
 kde4_add_ui_files( squeeze_SRCS

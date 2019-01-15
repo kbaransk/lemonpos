@@ -2873,7 +2873,7 @@ qulonglong Azahar::insertTransaction(TransactionInfo info)
   //else {
     // insert a new one.
     QSqlQuery query2(db);
-    query2.prepare("INSERT INTO transactions (clientid, type, amount, date,  time, paidwith, changegiven, paymethod, state, userid, cardnumber, itemcount, itemslist, cardauthnumber, utility, terminalnum, providerid, specialOrders, balanceId, totalTax, cardtype) VALUES (:clientid, :type, :amount, :date, :time, :paidwith, :changegiven, :paymethod, :state, :userid, :cardnumber, :itemcount, :itemslist, :cardauthnumber, :utility, :terminalnum, :providerid, :specialOrders, :balance, :tax, :cardType)"); //removed groups 29DIC09
+    query2.prepare("INSERT INTO transactions (clientid, type, amount, date,  time, paidwith, changegiven, paymethod, state, userid, cardnumber, itemcount, itemslist, cardauthnumber, utility, terminalnum, providerid, specialOrders, balanceId, totalTax, cardtype, paidWithPointsPoints, paidWithPointsValue) VALUES (:clientid, :type, :amount, :date, :time, :paidwith, :changegiven, :paymethod, :state, :userid, :cardnumber, :itemcount, :itemslist, :cardauthnumber, :utility, :terminalnum, :providerid, :specialOrders, :balance, :tax, :cardType, :paidWithPointsPoints, :paidWithPointsValue)"); //removed groups 29DIC09
 
     /** Remember to improve queries readability:
      * query2.prepare("INSERT INTO transactions ( \
@@ -2911,6 +2911,9 @@ qulonglong Azahar::insertTransaction(TransactionInfo info)
     query2.bindValue(":specialOrders", info.specialOrders);
     query2.bindValue(":balance", info.balanceId);
     query2.bindValue(":cardType", info.cardType);
+    query2.bindValue(":paidWithPointsPoints", info.paidWithPointsPoints);
+    query2.bindValue(":paidWithPointsValue", info.paidWithPointsValue.toDouble());
+
     if (!query2.exec() ) {
       int errNum = query2.lastError().number();
       QSqlError::ErrorType errType = query2.lastError().type();
@@ -2927,7 +2930,7 @@ bool Azahar::updateTransaction(TransactionInfo info)
 {
   bool result=false;
   QSqlQuery query2(db);
-  query2.prepare("UPDATE transactions SET disc=:disc, discmoney=:discMoney, amount=:amount, date=:date,  time=:time, paidwith=:paidw, changegiven=:change, paymethod=:paymethod, cardtype=:cardType, state=:state, cardnumber=:cardnumber, itemcount=:itemcount, itemslist=:itemlist, cardauthnumber=:cardauthnumber, utility=:utility, terminalnum=:terminalnum, points=:points, clientid=:clientid, specialOrders=:sorders, balanceId=:balance, totalTax=:tax WHERE id=:code");
+  query2.prepare("UPDATE transactions SET disc=:disc, discmoney=:discMoney, amount=:amount, date=:date,  time=:time, paidwith=:paidw, changegiven=:change, paymethod=:paymethod, cardtype=:cardType, state=:state, cardnumber=:cardnumber, itemcount=:itemcount, itemslist=:itemlist, cardauthnumber=:cardauthnumber, utility=:utility, terminalnum=:terminalnum, points=:points, clientid=:clientid, specialOrders=:sorders, balanceId=:balance, totalTax=:tax, paidWithPointsPoints=:paidWithPointsPoints, paidWithPointsValue=:paidWithPointsValue WHERE id=:code");
   query2.bindValue(":disc", info.disc);
   query2.bindValue(":discMoney", info.discmoney);
   query2.bindValue(":code", info.id);
@@ -2950,6 +2953,9 @@ bool Azahar::updateTransaction(TransactionInfo info)
   query2.bindValue(":sorders", info.specialOrders);
   query2.bindValue(":balance", info.balanceId);
   query2.bindValue(":cardType", info.cardType);
+  query2.bindValue(":paidWithPointsPoints", info.paidWithPointsPoints);
+  query2.bindValue(":paidWithPointsValue", info.paidWithPointsValue.toDouble());
+
   qDebug()<<"Transaction ID:"<<info.id;
   if (!query2.exec() ) {
     int errNum = query2.lastError().number();

@@ -28,6 +28,8 @@
 #include <QDate>
 #include <QHash>
 
+#include "nouns/Currency.h"
+
 struct ProductInfo {
   qulonglong code;
   QString desc;
@@ -134,7 +136,7 @@ struct TransactionInfo
   qulonglong balanceId; //to store balance where it was sold. For SESSIONS.
   double     totalTax; //in money.
   qulonglong paidWithPointsPoints;
-  double     paidWithPointsValue;
+  Currency   paidWithPointsValue;
 };
 
 struct BalanceInfo
@@ -252,7 +254,7 @@ struct TicketInfo {
   qulonglong reservationId;
 
   qulonglong paidWithPointsPoints;
-  double     paidWithPointsValue;
+  Currency   paidWithPointsValue;
 };
 
 struct PrintTicketInfo {
@@ -298,6 +300,9 @@ struct PrintTicketInfo {
   QString    subtotal;
   QString    resTotalAmountStr;
   QString    hdrReservation;
+  QString    labelPaidWithPointsValue;
+  QString    paidWithPointsValueString;
+  Currency   paidWithPointsValue;
 };
 
 //TODO: add grouped products and special orders
